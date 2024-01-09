@@ -2,6 +2,7 @@ package com.cairnfg.waypoint.authorization.entity;
 
 import com.cairnfg.waypoint.authorization.entity.converter.EncryptedFieldConverter;
 import com.cairnfg.waypoint.authorization.entity.enumeration.AccountType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +13,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 
 @Data
 @Entity
@@ -44,9 +44,14 @@ public class Account extends BaseEntity implements UserDetails {
     @Enumerated(EnumType.ORDINAL)
     private AccountType accountType;
 
-    private List<Permission> permissions;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "account_permission",
+            joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id", referencedColumnName = "id"))
+    private Collection<Permission> permissions;
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.permissions;
     }
