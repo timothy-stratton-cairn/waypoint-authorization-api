@@ -1,4 +1,4 @@
-package com.cairnfg.waypoint.authorization.configuration;
+package com.cairnfg.waypoint.authorization.configuration.cryptography;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;

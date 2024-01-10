@@ -1,6 +1,6 @@
 package com.cairnfg.waypoint.authorization.entity.converter;
 
-import com.cairnfg.waypoint.authorization.configuration.AES256;
+import com.cairnfg.waypoint.authorization.configuration.cryptography.AES256;
 import jakarta.persistence.AttributeConverter;
 
 public class EncryptedFieldConverter implements AttributeConverter<String, String> {

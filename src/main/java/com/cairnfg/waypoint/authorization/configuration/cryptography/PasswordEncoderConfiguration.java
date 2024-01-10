@@ -1,4 +1,4 @@
-package com.cairnfg.waypoint.authorization.configuration;
+package com.cairnfg.waypoint.authorization.configuration.cryptography;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
