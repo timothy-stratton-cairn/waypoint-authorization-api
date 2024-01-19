@@ -4,30 +4,40 @@ import com.cairnfg.waypoint.authorization.entity.converter.EncryptedFieldConvert
 import com.cairnfg.waypoint.authorization.entity.enumeration.AccountType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Data
 @Entity
-@SuperBuilder
+@Builder
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "account")
-@EqualsAndHashCode(callSuper = true)
-public class Account extends BaseEntity implements UserDetails {
+public class Account implements BaseEntity<Long>, UserDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @CreationTimestamp
+    private LocalDateTime created;
+    @UpdateTimestamp
+    private LocalDateTime updated;
+    @Builder.Default
+    private String modifiedBy = "system";
     private String username;
     private String password;
     @Convert(converter = EncryptedFieldConverter.class)
     private String firstName;
     @Convert(converter = EncryptedFieldConverter.class)
     private String lastName;
+    @Convert(converter = EncryptedFieldConverter.class)
+    private String email;
     @Convert(converter = EncryptedFieldConverter.class)
     private String address1;
     @Convert(converter = EncryptedFieldConverter.class)
@@ -40,6 +50,12 @@ public class Account extends BaseEntity implements UserDetails {
     private Boolean accountLocked;
     private Boolean credentialsExpired;
     private Boolean enabled;
+    @Column(name = "accepted_tc")
+    private Boolean acceptedTC; //terms and conditions
+    @Column(name = "accepted_eula")
+    private Boolean acceptedEULA; //end-user licensing agreement
+    @Column(name = "accepted_pa")
+    private Boolean acceptedPA; //privacy agreement
 
     @Enumerated(EnumType.ORDINAL)
     private AccountType accountType;

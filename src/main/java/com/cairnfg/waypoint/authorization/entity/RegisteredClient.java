@@ -2,11 +2,9 @@ package com.cairnfg.waypoint.authorization.entity;
 
 import com.cairnfg.waypoint.authorization.entity.converter.AbstractObjectConverter;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
@@ -15,18 +13,32 @@ import org.springframework.security.oauth2.server.authorization.settings.TokenSe
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @Entity
-@SuperBuilder
+@Builder
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "registered_client")
-@EqualsAndHashCode(callSuper = true)
-public class RegisteredClient extends BaseEntity implements Serializable {
+@Table(name = "oauth2_registered_client")
+public class RegisteredClient extends org.springframework.security.oauth2.server.authorization.client.RegisteredClient implements BaseEntity<String>, Serializable {
     @Serial
     private static final long serialVersionUID = 7526472295622776147L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "registered_client_id", unique = true, nullable = false)
+    private Long registeredClientId;
+    @lombok.Builder.Default
+    private String id = UUID.randomUUID().toString();
+    @CreationTimestamp
+    private LocalDateTime created;
+    @UpdateTimestamp
+    private LocalDateTime updated;
+    @lombok.Builder.Default
+    private String modifiedBy = "system";
     private String clientId;
     private Instant clientIdIssuedAt;
     private String clientSecret;

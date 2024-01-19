@@ -1,8 +1,10 @@
 package com.cairnfg.waypoint.authorization.controller.login;
 
 import com.cairnfg.waypoint.authorization.entity.Account;
+import com.cairnfg.waypoint.authorization.entity.Authorization;
 import com.cairnfg.waypoint.authorization.entity.Permission;
 import com.cairnfg.waypoint.authorization.repository.AccountRepository;
+import com.cairnfg.waypoint.authorization.repository.AuthorizationRepository;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -21,6 +23,7 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
@@ -35,6 +38,8 @@ public class OAuth2LoginEndpoint {
     private AuthenticationManager authenticationManager;
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private AuthorizationRepository authorizationRepository;
 
     @Autowired
     private AuthorizationServerSettings authorizationServerSettings;
@@ -44,22 +49,66 @@ public class OAuth2LoginEndpoint {
 
     @PreAuthorize("permitAll()")
     @PostMapping(PATH)
-    public ResponseEntity<String> login() throws JOSEException {
+    public ResponseEntity<SuccessfulLoginResponseDto> login() throws JOSEException {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("test_username", "password");
         if (authenticationManager.authenticate(authenticationToken).isAuthenticated()) {
             Account account = accountRepository.findByUsername("test_username").get();
-            return ResponseEntity.ok(generateJwt(generateAccessTokenClaimsSet(account)));
+            Date expiresAt = Date.from(Instant.now().plusSeconds(3600));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+            String authorizationId = UUID.randomUUID().toString();
+            String accessToken = generateJwt(generateAccessTokenClaimsSet(account, expiresAt));
+            String refreshToken = generateJwt(generateRefreshTokenClaimsSet(account, authorizationId, expiresAt));
+            String idToken = generateJwt(generateIdTokenClaimsSet(account, expiresAt));
+
+            Authorization authorization = Authorization.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .idToken(idToken)
+                    .authorizationGuid(authorizationId)
+                    .account(account)
+                    .build();
+
+            authorizationRepository.save(authorization);
+
+            SuccessfulLoginResponseDto responseDto = SuccessfulLoginResponseDto.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .idToken(idToken)
+                    .expiresAt(formatter.format(expiresAt))
+                    .permissions(account.getPermissions().stream().map(Permission::getName).collect(Collectors.toList()))
+                    .build();
+
+            return ResponseEntity.ok(responseDto);
         }
 
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    public JWTClaimsSet generateAccessTokenClaimsSet(Account account) {
+    public JWTClaimsSet generateAccessTokenClaimsSet(Account account, Date expirationTime) {
         return new JWTClaimsSet.Builder().issuer(this.authorizationServerSettings.getIssuer())
                 .subject(account.getUsername()).audience(Collections.singletonList(account.getUsername()))
                 .claim("scope", account.getPermissions().stream().map(Permission::getName).collect(Collectors.joining(" ")))
                 .claim("groups", account.getPermissions().stream().map(Permission::getName).collect(Collectors.toList()))
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                .expirationTime(expirationTime)
+                .notBeforeTime(Date.from(Instant.now())).issueTime(Date.from(Instant.now())).jwtID(UUID.randomUUID().toString())
+                .build();
+    }
+
+    public JWTClaimsSet generateRefreshTokenClaimsSet(Account account, String authorizationId, Date expirationTime) {
+        return new JWTClaimsSet.Builder().issuer(this.authorizationServerSettings.getIssuer())
+                .subject(account.getUsername()).audience(Collections.singletonList(account.getUsername()))
+                .claim("authorizationId", authorizationId)
+                .expirationTime(expirationTime)
+                .notBeforeTime(Date.from(Instant.now())).issueTime(Date.from(Instant.now())).jwtID(UUID.randomUUID().toString())
+                .build();
+    }
+
+    public JWTClaimsSet generateIdTokenClaimsSet(Account account, Date expirationTime) {
+        return new JWTClaimsSet.Builder().issuer(this.authorizationServerSettings.getIssuer())
+                .subject(account.getUsername()).audience(Collections.singletonList(account.getUsername()))
+                .claim("idInfo", IdTokenInfoDto.MAPPER.accountToIdTokenInfoDto(account))
+                .expirationTime(expirationTime)
                 .notBeforeTime(Date.from(Instant.now())).issueTime(Date.from(Instant.now())).jwtID(UUID.randomUUID().toString())
                 .build();
     }

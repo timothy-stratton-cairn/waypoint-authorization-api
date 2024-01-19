@@ -1,8 +1,12 @@
 package com.cairnfg.waypoint.authorization.repository;
 
-import com.cairnfg.waypoint.authorization.entity.RegisteredClient;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.lang.Nullable;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
+import org.springframework.stereotype.Component;
 
-public interface RegisteredClientRepository extends JpaRepository<RegisteredClient, String> {
+@Component
+public class RegisteredClientRepository extends JdbcRegisteredClientRepository {
+    public RegisteredClientRepository(JdbcOperations jdbcOperations) {
+        super(jdbcOperations);
+    }
 }
