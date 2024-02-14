@@ -16,7 +16,6 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,18 +39,21 @@ import java.util.stream.Collectors;
 public class OAuth2LoginEndpoint {
     public static final String PATH = "/api/oauth/token";
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private AccountRepository accountRepository;
-    @Autowired
-    private AuthorizationRepository authorizationRepository;
+    private final AuthenticationManager authenticationManager;
+    private final AccountRepository accountRepository;
+    private final AuthorizationRepository authorizationRepository;
+    private final AuthorizationServerSettings authorizationServerSettings;
+    private final RSAKey rsaKey;
 
-    @Autowired
-    private AuthorizationServerSettings authorizationServerSettings;
-
-    @Autowired
-    private RSAKey rsaKey;
+    public OAuth2LoginEndpoint(AuthenticationManager authenticationManager, AccountRepository accountRepository,
+                               AuthorizationRepository authorizationRepository, AuthorizationServerSettings authorizationServerSettings,
+                               RSAKey rsaKey) {
+        this.authenticationManager = authenticationManager;
+        this.accountRepository = accountRepository;
+        this.authorizationRepository = authorizationRepository;
+        this.authorizationServerSettings = authorizationServerSettings;
+        this.rsaKey = rsaKey;
+    }
 
     @PreAuthorize("permitAll()")
     @PostMapping(PATH)
