@@ -4,27 +4,26 @@ waypoint:
 spring:
   application:
     name: waypoint-authorization-api
-  security:
-    oauth2:
-      authorizationserver:
-        client:
-          oidc-client:
-            registration:
-              client-id: "oidc-client"
-              client-secret: "{noop}secret"
-              client-authentication-methods:
-                - "client_secret_basic"
-              authorization-grant-types:
-                - "authorization_code"
-                - "refresh_token"
-              redirect-uris:
-                - "http://127.0.0.1:8080/login/oauth2/code/oidc-client"
-              post-logout-redirect-uris:
-                - "http://127.0.0.1:8080/"
-              scopes:
-                - "openid"
-                - "profile"
-            require-authorization-consent: true
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://localhost:3306/authorization?useSSL=false
+    username: root
+    password:
+    hikari:
+      poolName: Hikari
+      auto-commit: true
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+  liquibase:
+    enabled: true
+    drop-first: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
 
 server:
   port: 8082
@@ -32,4 +31,4 @@ server:
 
 logging:
   level:
-    org.springframework.security: debug
+    org.springframework.security: INFO

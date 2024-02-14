@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/create-authorization-db-schema.yaml
+  - include:
+      file: db/changelog/2024-02-13-add-read-permissions-to-db.yaml
+  - include:
+      file: db/changelog/2024-02-13-add-roles-to-db.yaml

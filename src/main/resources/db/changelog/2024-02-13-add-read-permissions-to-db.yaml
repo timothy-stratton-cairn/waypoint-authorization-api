@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - preConditions:
+      onFail: HALT
+      onError: HALT
+  - changeSet:
+      id: add-permissions-to-permission-table
+      author: tstratton
+      changes:
+        - sql:
+            dbms: 'h2, mysql'
+            sql: INSERT INTO permission (created, updated, modified_by, name, description) VALUES
+              (NOW(), NOW(), 'liquibase', 'protocol.read', 'Can read/view Protocols'),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.template.read', 'Can read/view Protocol Step Templates'),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.template.category.read', 'Can read/view Protocol Step Template Categories'),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.read', 'Can read/view Protocol Steps'),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.task.read', 'Can read/view Protocol Step Tasks'),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.status.read', 'Can read/view Protocol Step Statuses'),
+              (NOW(), NOW(), 'liquibase', 'homework.read', 'Can read a read/view Homework'),
+              (NOW(), NOW(), 'liquibase', 'homework.response.read', 'Can read/view Homework Responses'),
+              (NOW(), NOW(), 'liquibase', 'account.read', 'Can read/view User Accounts'),
+              (NOW(), NOW(), 'liquibase', 'account.type.read', 'Can read/view Account Types'),
+              (NOW(), NOW(), 'liquibase', 'authorization.read', 'Can read/view Authorizations'),
+              (NOW(), NOW(), 'liquibase', 'permission.read', 'Can read/view Permissions'),
+              (NOW(), NOW(), 'liquibase', 'registered.client.read', 'Can read/view Registered Clients');
