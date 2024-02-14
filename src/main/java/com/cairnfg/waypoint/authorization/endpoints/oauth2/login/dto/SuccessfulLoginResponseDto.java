@@ -1,4 +1,4 @@
-package com.cairnfg.waypoint.authorization.controller.login;
+package com.cairnfg.waypoint.authorization.endpoints.login.dto;
 
 import lombok.Builder;
 import lombok.Data;

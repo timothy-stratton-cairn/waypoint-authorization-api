@@ -1,7 +1,7 @@
 package com.cairnfg.waypoint.authorization.configuration.security;
 
-import com.cairnfg.waypoint.authorization.controller.login.OAuth2LoginEndpoint;
-import com.cairnfg.waypoint.authorization.controller.user.GetUserEndpoint;
+import com.cairnfg.waypoint.authorization.endpoints.oauth2.login.OAuth2LoginEndpoint;
+import com.cairnfg.waypoint.authorization.endpoints.user.userinfo.GetUserEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,14 +23,16 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, BearerTokenAuthenticationFilter bearerTokenAuthenticationFilter) throws Exception {
+        http.apply(new OAuth2AuthorizationServerConfigurer());
+
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers(OAuth2LoginEndpoint.PATH).permitAll()
-                        .requestMatchers(GetUserEndpoint.PATH).hasAuthority("SCOPE_admin.all")
-                        .anyRequest().authenticated()
-                )
-                .addFilter(bearerTokenAuthenticationFilter);
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests((authorize) -> authorize
+                    .requestMatchers(OAuth2LoginEndpoint.PATH).permitAll()
+                    .requestMatchers(GetUserEndpoint.PATH).hasAuthority("SCOPE_account.read")
+                    .anyRequest().permitAll()
+            )
+            .addFilter(bearerTokenAuthenticationFilter);
 
         return http.build();
     }

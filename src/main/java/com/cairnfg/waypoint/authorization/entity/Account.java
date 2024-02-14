@@ -1,7 +1,6 @@
 package com.cairnfg.waypoint.authorization.entity;
 
 import com.cairnfg.waypoint.authorization.entity.converter.EncryptedFieldConverter;
-import com.cairnfg.waypoint.authorization.entity.enumeration.AccountType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -20,7 +21,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "account")
-public class Account implements BaseEntity<Long>, UserDetails {
+public class    Account implements BaseEntity<Long>, UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -57,19 +58,19 @@ public class Account implements BaseEntity<Long>, UserDetails {
     @Column(name = "accepted_pa")
     private Boolean acceptedPA; //privacy agreement
 
-    @Enumerated(EnumType.ORDINAL)
-    private AccountType accountType;
-
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "account_permission",
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(name = "account_role",
             joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id", referencedColumnName = "id"))
-    private Collection<Permission> permissions;
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+    private Collection<Role> roles;
 
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.permissions;
+        return this.roles.stream()
+                .map(Role::getPermissions)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override

@@ -23,29 +23,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
-#  security:
-#    oauth2:
-#      authorizationserver:
-#        client:
-#          oidc-client:
-#            registration:
-#              client-id: "oidc-client"
-#              client-secret: "{noop}secret"
-#              client-authentication-methods:
-#                - "client_secret_basic"
-#              authorization-grant-types:
-#                - "authorization_code"
-#                - "refresh_token"
-#                - "password"
-#              redirect-uris:
-#                - "http://127.0.0.1:8082/login/oauth2/code/oidc-client"
-#              post-logout-redirect-uris:
-#                - "http://127.0.0.1:8082/"
-#              scopes:
-#                - "openid"
-#                - "profile"
-#            require-authorization-consent: true
+    show-sql: false
 
 server:
   port: 8082
@@ -53,4 +31,4 @@ server:
 
 logging:
   level:
-    org.springframework.security: trace
+    org.springframework.security: INFO

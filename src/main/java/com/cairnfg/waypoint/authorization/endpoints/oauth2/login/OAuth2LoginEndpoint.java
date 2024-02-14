@@ -1,8 +1,10 @@
-package com.cairnfg.waypoint.authorization.controller.login;
+package com.cairnfg.waypoint.authorization.endpoints.oauth2.login;
 
+import com.cairnfg.waypoint.authorization.endpoints.login.dto.IdTokenInfoDto;
+import com.cairnfg.waypoint.authorization.endpoints.login.dto.LoginRequestDto;
+import com.cairnfg.waypoint.authorization.endpoints.login.dto.SuccessfulLoginResponseDto;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Authorization;
-import com.cairnfg.waypoint.authorization.entity.Permission;
 import com.cairnfg.waypoint.authorization.repository.AccountRepository;
 import com.cairnfg.waypoint.authorization.repository.AuthorizationRepository;
 import com.nimbusds.jose.JOSEException;
@@ -13,14 +15,17 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
@@ -30,6 +35,7 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 public class OAuth2LoginEndpoint {
     public static final String PATH = "/api/oauth/token";
@@ -49,10 +55,11 @@ public class OAuth2LoginEndpoint {
 
     @PreAuthorize("permitAll()")
     @PostMapping(PATH)
-    public ResponseEntity<SuccessfulLoginResponseDto> login() throws JOSEException {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("test_username", "password");
+    public ResponseEntity<SuccessfulLoginResponseDto> login(@RequestBody LoginRequestDto loginRequest) throws JOSEException {
+        log.info("Attempting to login to user account with username [{}]", loginRequest.getUsername());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
         if (authenticationManager.authenticate(authenticationToken).isAuthenticated()) {
-            Account account = accountRepository.findByUsername("test_username").get();
+            Account account = accountRepository.findByUsername(loginRequest.getUsername()).get();
             Date expiresAt = Date.from(Instant.now().plusSeconds(3600));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
@@ -76,20 +83,21 @@ public class OAuth2LoginEndpoint {
                     .refreshToken(refreshToken)
                     .idToken(idToken)
                     .expiresAt(formatter.format(expiresAt))
-                    .permissions(account.getPermissions().stream().map(Permission::getName).collect(Collectors.toList()))
+                    .permissions(account.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                     .build();
 
             return ResponseEntity.ok(responseDto);
         }
 
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        log.info("Login attempt to user account with username [{}] failed", loginRequest.getUsername());
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     public JWTClaimsSet generateAccessTokenClaimsSet(Account account, Date expirationTime) {
         return new JWTClaimsSet.Builder().issuer(this.authorizationServerSettings.getIssuer())
                 .subject(account.getUsername()).audience(Collections.singletonList(account.getUsername()))
-                .claim("scope", account.getPermissions().stream().map(Permission::getName).collect(Collectors.joining(" ")))
-                .claim("groups", account.getPermissions().stream().map(Permission::getName).collect(Collectors.toList()))
+                .claim("scope", account.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(" ")))
+                .claim("groups", account.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .expirationTime(expirationTime)
                 .notBeforeTime(Date.from(Instant.now())).issueTime(Date.from(Instant.now())).jwtID(UUID.randomUUID().toString())
                 .build();

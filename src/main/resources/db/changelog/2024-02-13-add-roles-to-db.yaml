@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - preConditions:
+      onFail: HALT
+      onError: HALT
+  - changeSet:
+      id: add-roles-to-role-table
+      author: tstratton
+      changes:
+        - sql:
+            dbms: 'h2, mysql'
+            sql: INSERT INTO role (created, updated, modified_by, name, description) VALUES
+              (NOW(), NOW(), 'liquibase', 'Client', 'Clients are users who utilize a financial service'),
+              (NOW(), NOW(), 'liquibase', 'User', 'Users are employees of Financial Group with base level permissions to enter and edit data'),
+              (NOW(), NOW(), 'liquibase', 'Admin', 'Admin users are employees of the Financial Group with all permissions available');
+        - sql:
+            dbms: 'h2, mysql'
+            sql: INSERT INTO `authorization`.role_permission (role_id,permission_id) 
+              SELECT r.id, p.id FROM role r, permission p WHERE r.name = 'Admin';

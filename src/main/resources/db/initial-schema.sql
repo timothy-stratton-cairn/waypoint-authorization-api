@@ -6,7 +6,7 @@ CREATE TABLE `account` (
   `modified_by` varchar(255) DEFAULT NULL,
   `account_expired` bit(1) DEFAULT NULL,
   `account_locked` bit(1) DEFAULT NULL,
-  `account_type` tinyint DEFAULT NULL,
+  `role` tinyint DEFAULT NULL,
   `credentials_expired` bit(1) DEFAULT NULL,
   `enabled` bit(1) DEFAULT NULL,
   `address1` varchar(255) DEFAULT NULL,
@@ -23,7 +23,6 @@ CREATE TABLE `account` (
   `accepted_pa` bit(1) DEFAULT NULL,
   `accepted_tc` bit(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `account_chk_1` CHECK ((`account_type` between 0 and 2))
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
