@@ -1,4 +1,4 @@
-package com.cairnfg.waypoint.authorization.endpoints.user.userinfo.dto;
+package com.cairnfg.waypoint.authorization.endpoints.user.getallusers.dto;
 
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.fasterxml.jackson.annotation.JsonIgnore;

@@ -1,7 +1,7 @@
 package com.cairnfg.waypoint.authorization.configuration.security;
 
 import com.cairnfg.waypoint.authorization.endpoints.oauth2.login.OAuth2LoginEndpoint;
-import com.cairnfg.waypoint.authorization.endpoints.user.userinfo.GetUserEndpoint;
+import com.cairnfg.waypoint.authorization.endpoints.user.getallusers.GetAllUsersEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,7 +29,7 @@ public class SecurityConfiguration {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests((authorize) -> authorize
                     .requestMatchers(OAuth2LoginEndpoint.PATH).permitAll()
-                    .requestMatchers(GetUserEndpoint.PATH).hasAuthority("SCOPE_account.read")
+                    .requestMatchers(GetAllUsersEndpoint.PATH).hasAuthority("SCOPE_account.read")
                     .anyRequest().permitAll()
             )
             .addFilter(bearerTokenAuthenticationFilter);

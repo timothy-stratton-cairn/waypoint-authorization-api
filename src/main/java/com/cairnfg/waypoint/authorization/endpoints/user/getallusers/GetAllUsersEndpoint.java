@@ -1,7 +1,7 @@
-package com.cairnfg.waypoint.authorization.endpoints.user.userinfo;
+package com.cairnfg.waypoint.authorization.endpoints.user.getallusers;
 
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
-import com.cairnfg.waypoint.authorization.endpoints.user.userinfo.dto.UserInfoDto;
+import com.cairnfg.waypoint.authorization.endpoints.user.getallusers.dto.UserInfoDto;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +16,13 @@ import java.time.LocalDateTime;
 @Slf4j
 @RestController
 @SuppressWarnings({"squid:S1075", "squid:S1452"})
-public class GetUserEndpoint {
+public class GetAllUsersEndpoint {
     public static final String PATH = "/api/user";
 
     private final AccountService accountService;
     private final UserInfoDto.UserInfoDtoMapper mapper = UserInfoDto.UserInfoDtoMapper.INSTANCE;
 
-    public GetUserEndpoint(AccountService accountService) {
+    public GetAllUsersEndpoint(AccountService accountService) {
         this.accountService = accountService;
     }
 
