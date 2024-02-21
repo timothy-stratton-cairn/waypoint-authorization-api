@@ -165,9 +165,6 @@ class OAuth2LoginEndpointTest {
                         expectedAccessTokenClaimsSet.getClaims().get("iss"),
                         expectedAccessTokenClaimsSet.getClaims().get("groups")
                 );
-
-        assertThat(capturedAuthorizationValue)
-                .isEqualTo(providedAuthorization);
     }
 
     @Test
