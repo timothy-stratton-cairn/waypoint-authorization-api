@@ -1,8 +1,14 @@
 package com.cairnfg.waypoint.authorization.service;
 
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.repository.AccountRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,87 +16,81 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class AccountServiceTest {
-    @InjectMocks
-    private AccountService underTest;
 
-    @Mock
-    private AccountRepository accountRepository;
+  @InjectMocks
+  private AccountService underTest;
 
-    @Test
-    void givenExistingUsername_whenLoadUserByUsername_thenUserIsReturn() {
-        //Given
-        Account testAccount = Account.builder()
-                .firstName("first-name")
-                .lastName("last-name")
-                .email("no@no.com")
-                .username("username-1")
-                .build();
+  @Mock
+  private AccountRepository accountRepository;
 
-        when(accountRepository.findByUsername(anyString())).thenReturn(Optional.of(testAccount));
+  @Test
+  void givenExistingUsername_whenLoadUserByUsername_thenUserIsReturn() {
+    //Given
+    Account testAccount = Account.builder()
+        .firstName("first-name")
+        .lastName("last-name")
+        .email("no@no.com")
+        .username("username-1")
+        .build();
 
-        //When
-        UserDetails returnedUserDetails = underTest.loadUserByUsername(testAccount.getUsername());
+    when(accountRepository.findByUsername(anyString())).thenReturn(Optional.of(testAccount));
 
-        //Then
-        assertThat(returnedUserDetails)
-                .isNotNull()
-                .isInstanceOf(Account.class)
-                .isEqualTo(testAccount);
-    }
+    //When
+    UserDetails returnedUserDetails = underTest.loadUserByUsername(testAccount.getUsername());
 
-    @Test
-    void givenNonexistentUsername_whenLoadUserByUsername_thenExceptionIsThrown() {
-        //Given
-        when(accountRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+    //Then
+    assertThat(returnedUserDetails)
+        .isNotNull()
+        .isInstanceOf(Account.class)
+        .isEqualTo(testAccount);
+  }
 
-        //When - Then
-        assertThatThrownBy(() -> underTest.loadUserByUsername("non-existent-username"))
-            .isInstanceOf(IllegalArgumentException.class);
-    }
+  @Test
+  void givenNonexistentUsername_whenLoadUserByUsername_thenExceptionIsThrown() {
+    //Given
+    when(accountRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-    @Test
-    void givenExistingUsername_whenFindByUsername_thenUserIsReturn() {
-        //Given
-        Account testAccount = Account.builder()
-                .firstName("first-name")
-                .lastName("last-name")
-                .email("no@no.com")
-                .username("username-1")
-                .build();
+    //When - Then
+    assertThatThrownBy(() -> underTest.loadUserByUsername("non-existent-username"))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
 
-        when(accountRepository.findByUsername(anyString())).thenReturn(Optional.of(testAccount));
+  @Test
+  void givenExistingUsername_whenFindByUsername_thenUserIsReturn() {
+    //Given
+    Account testAccount = Account.builder()
+        .firstName("first-name")
+        .lastName("last-name")
+        .email("no@no.com")
+        .username("username-1")
+        .build();
 
-        //When
-        Optional<Account> returnedAccount = underTest.findByUsername(testAccount.getUsername());
+    when(accountRepository.findByUsername(anyString())).thenReturn(Optional.of(testAccount));
 
-        //Then
-        assertThat(returnedAccount)
-                .isPresent()
-                .get()
-                .isEqualTo(testAccount);
+    //When
+    Optional<Account> returnedAccount = underTest.findByUsername(testAccount.getUsername());
 
-    }
+    //Then
+    assertThat(returnedAccount)
+        .isPresent()
+        .get()
+        .isEqualTo(testAccount);
 
-    @Test
-    void givenNonexistentUsername_whenFindByUsername_thenEmptyOptionIsReturned() {
-        //Given
-        when(accountRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+  }
 
-        //When
-        Optional<Account> returnedAccount = underTest.findByUsername("non-existent-username");
+  @Test
+  void givenNonexistentUsername_whenFindByUsername_thenEmptyOptionIsReturned() {
+    //Given
+    when(accountRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-        //Then
-        assertThat(returnedAccount)
-                .isEmpty()
-                .isNotPresent();
-    }
+    //When
+    Optional<Account> returnedAccount = underTest.findByUsername("non-existent-username");
+
+    //Then
+    assertThat(returnedAccount)
+        .isEmpty()
+        .isNotPresent();
+  }
 }

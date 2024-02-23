@@ -44,16 +44,15 @@ databaseChangeLog:
               `city` varchar(255) DEFAULT NULL,
               `state` varchar(255) DEFAULT NULL,
               `zip` varchar(255) DEFAULT NULL,
-              `account_expired` bit(1) DEFAULT NULL,
               `account_locked` bit(1) DEFAULT NULL,
-              `credentials_expired` bit(1) DEFAULT NULL,
+              `password_expiration_date` TIMESTAMP NOT NULL,
+              `account_expiration_date`  TIMESTAMP NOT NULL,
               `enabled` bit(1) DEFAULT NULL,
               `accepted_eula` bit(1) DEFAULT NULL,
               `accepted_pa` bit(1) DEFAULT NULL,
               `accepted_tc` bit(1) DEFAULT NULL,
-              `role_id` bigint DEFAULT NULL,
               PRIMARY KEY (`id`),
-              CONSTRAINT `FK423r1fdahga2va2ev6aa740ab` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`)
+              CONSTRAINT `FK423r1fdahga2va2ev6aa740ab` UNIQUE (`username`)
               ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
   - changeSet:
       id: create-account-role-table

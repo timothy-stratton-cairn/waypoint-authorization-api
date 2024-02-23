@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RegisteredClientRepository extends JdbcRegisteredClientRepository {
-    public RegisteredClientRepository(JdbcOperations jdbcOperations) {
-        super(jdbcOperations);
-    }
+
+  public RegisteredClientRepository(JdbcOperations jdbcOperations) {
+    super(jdbcOperations);
+  }
 }

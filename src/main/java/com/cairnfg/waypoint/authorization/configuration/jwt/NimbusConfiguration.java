@@ -13,19 +13,20 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 @Configuration
 public class NimbusConfiguration {
-    @Bean
-    public JWKSource<SecurityContext> jwkSource(RSAKey rsaKey) {
-        JWKSet jwkSet = new JWKSet(rsaKey);
-        return new ImmutableJWKSet<>(jwkSet);
-    }
 
-    @Bean
-    public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-        return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
-    }
+  @Bean
+  public JWKSource<SecurityContext> jwkSource(RSAKey rsaKey) {
+    JWKSet jwkSet = new JWKSet(rsaKey);
+    return new ImmutableJWKSet<>(jwkSet);
+  }
 
-    @Bean
-    public JwtAuthenticationProvider jwtAuthenticationProvider(JwtDecoder jwtDecoder) {
-        return new JwtAuthenticationProvider(jwtDecoder);
-    }
+  @Bean
+  public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+    return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+  }
+
+  @Bean
+  public JwtAuthenticationProvider jwtAuthenticationProvider(JwtDecoder jwtDecoder) {
+    return new JwtAuthenticationProvider(jwtDecoder);
+  }
 }

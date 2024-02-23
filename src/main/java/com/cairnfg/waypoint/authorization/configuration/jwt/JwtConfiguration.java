@@ -10,9 +10,10 @@ import org.springframework.security.oauth2.server.resource.web.authentication.Be
 @Configuration
 public class JwtConfiguration {
 
-    @Bean
-    public BearerTokenAuthenticationFilter bearerTokenAuthenticationFilter(JwtAuthenticationProvider jwtAuthProvider) {
-        AuthenticationManager jwtAuthMgr = new ProviderManager(jwtAuthProvider);
-        return new BearerTokenAuthenticationFilter(jwtAuthMgr);
-    }
+  @Bean
+  public BearerTokenAuthenticationFilter bearerTokenAuthenticationFilter(
+      JwtAuthenticationProvider jwtAuthProvider) {
+    AuthenticationManager jwtAuthMgr = new ProviderManager(jwtAuthProvider);
+    return new BearerTokenAuthenticationFilter(jwtAuthMgr);
+  }
 }

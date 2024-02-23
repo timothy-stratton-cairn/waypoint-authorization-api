@@ -6,7 +6,7 @@ spring:
     name: waypoint-authorization-api
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://localhost:3306/authorization?useSSL=false
+    url: jdbc:mysql://host.docker.internal:3306/authorization?useSSL=false
     username: root
     password:
     hikari:

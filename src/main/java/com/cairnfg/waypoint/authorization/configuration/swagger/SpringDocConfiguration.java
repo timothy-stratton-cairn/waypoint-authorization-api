@@ -11,18 +11,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SpringDocConfiguration {
 
-    @Bean
-    public OpenAPI waypointAuthorizationApiOpenApi() {
-        return new OpenAPI()
-                .addServersItem(new Server().description("Dev Server").url("http://96.61.158.12:8082"))
-                .addServersItem(new Server().description("Local Server").url("http://localhost:8082"))
-                .info(new Info()
-                        .title("Waypoint - Authorization API")
-                        .description("Waypoint - Authorization API provides the login, authorization, authentication, and user related features for Waypoint")
-                        .version("LATEST"))
-                .components(
-                        new Components().addSecuritySchemes("oAuth2JwtBearer",
-                                new SecurityScheme().name("oAuth2JwtBearer")
-                                        .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
-    }
+  @Bean
+  public OpenAPI waypointAuthorizationApiOpenApi() {
+    return new OpenAPI()
+        .addServersItem(new Server().description("Dev Server").url("http://96.61.158.12:8082"))
+        .addServersItem(new Server().description("Local Server").url("http://localhost:8082"))
+        .info(new Info()
+            .title("Waypoint - Authorization API")
+            .description(
+                "Waypoint - Authorization API provides the login, authorization, authentication, and user related features for Waypoint")
+            .version("LATEST"))
+        .components(
+            new Components().addSecuritySchemes("oAuth2JwtBearer",
+                new SecurityScheme().name("oAuth2JwtBearer")
+                    .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
+  }
 }
