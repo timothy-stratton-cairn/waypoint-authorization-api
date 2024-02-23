@@ -4,9 +4,16 @@ import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
 import com.cairnfg.waypoint.authorization.endpoints.user.getallusers.dto.UserInfoDto;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.service.AccountService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,19 +22,37 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
+@Tag(name = "User")
 @SuppressWarnings({"squid:S1075", "squid:S1452"})
-public class GetAllUsersEndpoint {
+public class GetUserInfoEndpoint {
     public static final String PATH = "/api/user";
 
     private final AccountService accountService;
     private final UserInfoDto.UserInfoDtoMapper mapper = UserInfoDto.UserInfoDtoMapper.INSTANCE;
 
-    public GetAllUsersEndpoint(AccountService accountService) {
+    public GetUserInfoEndpoint(AccountService accountService) {
         this.accountService = accountService;
     }
 
     @GetMapping(PATH)
-    public ResponseEntity<?> getAllUsers(Principal principal) {
+    @PreAuthorize("hasAuthority('SCOPE_account.read')")
+    @Operation(
+        summary = "Retrieves information around the currently logged in user.",
+        description = "Retrieves information around the currently logged in user. Requires the `account.read` permission.",
+        security = @SecurityRequirement(name = "oAuth2JwtBearer"),
+        responses = {
+            @ApiResponse(responseCode = "200",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = UserInfoDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                content = {@Content(schema = @Schema(hidden = true))}),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ErrorMessage.class))}),
+            @ApiResponse(responseCode = "404", description = "Not Found",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ErrorMessage.class))})})
+    public ResponseEntity<?> getUserInfo(Principal principal) {
         log.info("Retrieving user account with username [{}]", principal.getName());
         final ResponseEntity<?>[] response = new ResponseEntity<?>[1];
 

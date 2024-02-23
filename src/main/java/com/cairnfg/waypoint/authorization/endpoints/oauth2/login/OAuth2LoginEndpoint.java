@@ -15,6 +15,11 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -37,6 +42,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
+@Tag(name = "Login")
 public class OAuth2LoginEndpoint {
     public static final String PATH = "/api/oauth/token";
 
@@ -56,8 +62,16 @@ public class OAuth2LoginEndpoint {
         this.rsaKey = rsaKey;
     }
 
-    @PreAuthorize("permitAll()")
     @PostMapping(PATH)
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Signs in using OAuth2.",
+            description = "Signs in a user or client, and issues a JWT containing access permissions and other metadata. Endpoint can also be used to refresh an authorization without having to login again.",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            content = {@Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = SuccessfulLoginResponseDto.class))}),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized",
+                            content = {@Content(schema = @Schema(hidden = true))})})
     public ResponseEntity<SuccessfulLoginResponseDto> login(@RequestBody LoginRequestDto loginRequest) throws JOSEException {
         log.info("Attempting to login to user account with username [{}]", loginRequest.getUsername());
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());

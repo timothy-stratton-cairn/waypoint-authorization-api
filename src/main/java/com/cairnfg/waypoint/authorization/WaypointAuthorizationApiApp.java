@@ -1,7 +1,6 @@
 package com.cairnfg.waypoint.authorization;
 
 import com.cairnfg.waypoint.authorization.entity.Account;
-import com.cairnfg.waypoint.authorization.entity.Permission;
 import com.cairnfg.waypoint.authorization.entity.RegisteredClient;
 import com.cairnfg.waypoint.authorization.repository.AccountRepository;
 import com.cairnfg.waypoint.authorization.repository.PermissionRepository;
@@ -48,10 +47,10 @@ public class WaypointAuthorizationApiApp {
     @PostConstruct
     void init() {
 
-        Account account = Account.builder()
+        Account adminAccount = Account.builder()
                 .firstName("test_name")
                 .lastName("test_name")
-                .username("test_username")
+                .username("test_admin")
                 .email("no@no.com")
                 .password(passwordEncoder.encode("password"))
                 .roles(List.of(roleRepository.findByName("Admin").get()))
@@ -69,7 +68,30 @@ public class WaypointAuthorizationApiApp {
                 .acceptedTC(Boolean.TRUE)
                 .build();
 
-        accountRepository.save(account);
+        accountRepository.save(adminAccount);
+
+        Account userAccount = Account.builder()
+                .firstName("test_name")
+                .lastName("test_name")
+                .username("test_user")
+                .email("no@no.com")
+                .password(passwordEncoder.encode("password"))
+                .roles(List.of(roleRepository.findByName("User").get()))
+                .enabled(Boolean.TRUE)
+                .address1("1600 Pennsylvania Avenue")
+                .address2("Oval Office")
+                .city("Washington")
+                .state("District of Columbia")
+                .zip("12345")
+                .accountLocked(Boolean.FALSE)
+                .accountExpired(Boolean.FALSE)
+                .credentialsExpired(Boolean.FALSE)
+                .acceptedPA(Boolean.TRUE)
+                .acceptedEULA(Boolean.TRUE)
+                .acceptedTC(Boolean.TRUE)
+                .build();
+
+        accountRepository.save(userAccount);
 
         RegisteredClient oidcClient = RegisteredClient.builder()
                 .clientId("oidc-client")
