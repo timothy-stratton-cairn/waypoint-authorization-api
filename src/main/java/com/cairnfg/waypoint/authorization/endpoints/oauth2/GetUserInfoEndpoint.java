@@ -65,11 +65,11 @@ public class GetUserInfoEndpoint {
     return response[0];
   }
 
-  public ResponseEntity<UserInfoDto> generateSuccessResponse(Account account) {
+  private ResponseEntity<UserInfoDto> generateSuccessResponse(Account account) {
     return ResponseEntity.ok(mapper.accountToUserInfoDto(account));
   }
 
-  public ResponseEntity<ErrorMessage> generateFailureResponse(String username) {
+  private ResponseEntity<ErrorMessage> generateFailureResponse(String username) {
     log.warn("Account with username [{}] not found", username);
     return new ResponseEntity<>(
         ErrorMessage.builder()

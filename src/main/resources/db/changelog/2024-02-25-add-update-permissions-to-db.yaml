@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - preConditions:
+      onFail: HALT
+      onError: HALT
+  - changeSet:
+      id: add-permissions-to-permission-table
+      author: tstratton
+      changes:
+        - sql:
+            dbms: 'h2, mysql'
+            sql: INSERT INTO permission (created, updated, modified_by, name, description) VALUES
+              (NOW(), NOW(), 'liquibase', 'protocol.template.update', 'Can update Protocol Templates'),
+              (NOW(), NOW(), 'liquibase', 'protocol.update', 'Can update Protocols'),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.template.update', 'Can update Protocol Step Templates'),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.template.category.update', 'Can update Protocol Step Template Categories'),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.update', 'Can update Protocol Steps'),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.task.update', 'Can update Protocol Step Tasks'),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.status.update', 'Can update Protocol Step Statuses'),
+              (NOW(), NOW(), 'liquibase', 'homework.update', 'Can created a update Homework'),
+              (NOW(), NOW(), 'liquibase', 'homework.response.update', 'Can update Homework Responses'),
+              (NOW(), NOW(), 'liquibase', 'account.update', 'Can update User Accounts'),
+              (NOW(), NOW(), 'liquibase', 'role.update', 'Can update Roles'),
+              (NOW(), NOW(), 'liquibase', 'authorization.update', 'Can update Authorizations'),
+              (NOW(), NOW(), 'liquibase', 'permission.update', 'Can update Permissions'),
+              (NOW(), NOW(), 'liquibase', 'registered.client.update', 'Can update Registered Clients'),
+              (NOW(), NOW(), 'liquibase', 'account.update', 'Can update Accounts');
+        - sql:
+            dbms: 'h2, mysql'
+            sql: INSERT INTO `authorization`.role_permission (role_id,permission_id)
+              SELECT r.id, p.id FROM role r, permission p WHERE r.name = 'Admin';

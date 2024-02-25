@@ -9,6 +9,7 @@ databaseChangeLog:
         - sql:
             dbms: 'h2, mysql'
             sql: INSERT INTO permission (created, updated, modified_by, name, description) VALUES
+              (NOW(), NOW(), 'liquibase', 'protocol.template.read', 'Can read/view Protocols'),
               (NOW(), NOW(), 'liquibase', 'protocol.read', 'Can read/view Protocols'),
               (NOW(), NOW(), 'liquibase', 'protocol.step.template.read', 'Can read/view Protocol Step Templates'),
               (NOW(), NOW(), 'liquibase', 'protocol.step.template.category.read', 'Can read/view Protocol Step Template Categories'),

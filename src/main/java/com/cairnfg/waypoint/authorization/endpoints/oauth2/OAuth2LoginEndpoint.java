@@ -81,7 +81,7 @@ public class OAuth2LoginEndpoint {
     }
   }
 
-  public ResponseEntity<SuccessfulLoginResponseDto> generateSuccessResponse(
+  private ResponseEntity<SuccessfulLoginResponseDto> generateSuccessResponse(
       Authorization authorization, Date expiresAt) {
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
