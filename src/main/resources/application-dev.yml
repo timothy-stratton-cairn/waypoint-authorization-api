@@ -1,12 +1,13 @@
 waypoint:
   authorization:
+    base-url: http://localhost:8082
 
 spring:
   application:
     name: waypoint-authorization-api
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://host.docker.internal:3306/authorization?useSSL=false
+    url: jdbc:mysql://localhost:3306/authorization?useSSL=false
     username: root
     password:
     hikari:
@@ -19,7 +20,7 @@ spring:
         useServerPrepStmts: true
   liquibase:
     enabled: true
-    drop-first: false
+    drop-first: true
   jpa:
     hibernate:
       ddl-auto: validate

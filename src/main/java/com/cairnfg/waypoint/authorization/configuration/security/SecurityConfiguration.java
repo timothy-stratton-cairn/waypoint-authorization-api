@@ -33,6 +33,7 @@ public class SecurityConfiguration {
             .requestMatchers(OAuth2LoginEndpoint.PATH).permitAll()
             .requestMatchers("/swagger-ui/**").permitAll()
             .requestMatchers("/v3/api-docs/**").permitAll()
+            .requestMatchers("/.well-known/openid-configuration").permitAll()
             .anyRequest().authenticated()
         )
         .addFilter(bearerTokenAuthenticationFilter);

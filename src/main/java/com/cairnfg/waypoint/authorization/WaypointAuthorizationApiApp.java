@@ -39,14 +39,13 @@ public class WaypointAuthorizationApiApp {
 
   public static void main(String[] args) {
     SpringApplication app = new SpringApplication(WaypointAuthorizationApiApp.class);
-    app.setAdditionalProfiles("default");
+    app.setAdditionalProfiles("dev");
     app.run(args);
     log.info("App is running...");
   }
 
   @PostConstruct
   void init() {
-
     Account adminAccount = Account.builder()
         .firstName("test_name")
         .lastName("test_name")
@@ -68,7 +67,11 @@ public class WaypointAuthorizationApiApp {
         .acceptedTC(Boolean.TRUE)
         .build();
 
-    accountRepository.save(adminAccount);
+    try {
+      accountRepository.save(adminAccount);
+    } catch (Exception e) {
+      //nothing to be done
+    }
 
     Account userAccount = Account.builder()
         .firstName("test_name")
@@ -91,7 +94,11 @@ public class WaypointAuthorizationApiApp {
         .acceptedTC(Boolean.TRUE)
         .build();
 
-    accountRepository.save(userAccount);
+    try {
+      accountRepository.save(userAccount);
+    } catch (Exception e) {
+      //nothing to be done
+    }
 
     RegisteredClient oidcClient = RegisteredClient.builder()
         .clientId("oidc-client")
@@ -108,6 +115,10 @@ public class WaypointAuthorizationApiApp {
         .tokenSettings(TokenSettings.builder().build())
         .build();
 
-    registeredClientRepository.save(oidcClient);
+    try {
+      registeredClientRepository.save(oidcClient);
+    } catch (Exception e) {
+      //nothing to be done
+    }
   }
 }
