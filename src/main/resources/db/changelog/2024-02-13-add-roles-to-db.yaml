@@ -8,10 +8,10 @@ databaseChangeLog:
       changes:
         - sql:
             dbms: 'h2, mysql'
-            sql: INSERT INTO role (created, updated, modified_by, name, description) VALUES
-              (NOW(), NOW(), 'liquibase', 'Client', 'Clients are users who utilize a financial service'),
-              (NOW(), NOW(), 'liquibase', 'User', 'Users are employees of Financial Group with base level permissions to enter and edit data'),
-              (NOW(), NOW(), 'liquibase', 'Admin', 'Admin users are employees of the Financial Group with all permissions available');
+            sql: INSERT INTO role (created, updated, modified_by, name, description, active) VALUES
+              (NOW(), NOW(), 'liquibase', 'Client', 'Clients are users who utilize a financial service', 1),
+              (NOW(), NOW(), 'liquibase', 'User', 'Users are employees of Financial Group with base level permissions to enter and edit data', 1),
+              (NOW(), NOW(), 'liquibase', 'Admin', 'Admin users are employees of the Financial Group with all permissions available', 1);
         - sql:
             dbms: 'h2, mysql'
             sql: INSERT INTO role_permission (role_id,permission_id)

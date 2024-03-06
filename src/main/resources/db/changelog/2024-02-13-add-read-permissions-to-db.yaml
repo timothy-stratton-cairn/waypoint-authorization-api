@@ -8,19 +8,19 @@ databaseChangeLog:
       changes:
         - sql:
             dbms: 'h2, mysql'
-            sql: INSERT INTO permission (created, updated, modified_by, name, description) VALUES
-              (NOW(), NOW(), 'liquibase', 'protocol.template.read', 'Can read/view Protocols'),
-              (NOW(), NOW(), 'liquibase', 'protocol.read', 'Can read/view Protocols'),
-              (NOW(), NOW(), 'liquibase', 'protocol.step.template.read', 'Can read/view Protocol Step Templates'),
-              (NOW(), NOW(), 'liquibase', 'protocol.step.template.category.read', 'Can read/view Protocol Step Template Categories'),
-              (NOW(), NOW(), 'liquibase', 'protocol.step.read', 'Can read/view Protocol Steps'),
-              (NOW(), NOW(), 'liquibase', 'protocol.step.task.read', 'Can read/view Protocol Step Tasks'),
-              (NOW(), NOW(), 'liquibase', 'protocol.step.status.read', 'Can read/view Protocol Step Statuses'),
-              (NOW(), NOW(), 'liquibase', 'homework.read', 'Can read a read/view Homework'),
-              (NOW(), NOW(), 'liquibase', 'homework.response.read', 'Can read/view Homework Responses'),
-              (NOW(), NOW(), 'liquibase', 'account.read', 'Can read/view User Accounts'),
-              (NOW(), NOW(), 'liquibase', 'role.read', 'Can read/view Roles'),
-              (NOW(), NOW(), 'liquibase', 'authorization.read', 'Can read/view Authorizations'),
-              (NOW(), NOW(), 'liquibase', 'permission.read', 'Can read/view Permissions'),
-              (NOW(), NOW(), 'liquibase', 'registered.client.read', 'Can read/view Registered Clients'),
-              (NOW(), NOW(), 'liquibase', 'account.create', 'Can create Accounts');
+            sql: INSERT INTO permission (created, updated, modified_by, name, description, active) VALUES
+              (NOW(), NOW(), 'liquibase', 'protocol.template.read', 'Can read/view Protocols', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.read', 'Can read/view Protocols', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.template.read', 'Can read/view Protocol Step Templates', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.template.category.read', 'Can read/view Protocol Step Template Categories', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.read', 'Can read/view Protocol Steps', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.task.read', 'Can read/view Protocol Step Tasks', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.status.read', 'Can read/view Protocol Step Statuses', 1),
+              (NOW(), NOW(), 'liquibase', 'homework.read', 'Can read a read/view Homework', 1),
+              (NOW(), NOW(), 'liquibase', 'homework.response.read', 'Can read/view Homework Responses', 1),
+              (NOW(), NOW(), 'liquibase', 'account.read', 'Can read/view User Accounts', 1),
+              (NOW(), NOW(), 'liquibase', 'role.read', 'Can read/view Roles', 1),
+              (NOW(), NOW(), 'liquibase', 'authorization.read', 'Can read/view Authorizations', 1),
+              (NOW(), NOW(), 'liquibase', 'permission.read', 'Can read/view Permissions', 1),
+              (NOW(), NOW(), 'liquibase', 'registered.client.read', 'Can read/view Registered Clients', 1),
+              (NOW(), NOW(), 'liquibase', 'account.create', 'Can create Accounts', 1);

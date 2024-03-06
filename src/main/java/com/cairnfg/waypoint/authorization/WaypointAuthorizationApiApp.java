@@ -1,7 +1,9 @@
 package com.cairnfg.waypoint.authorization;
 
 import com.cairnfg.waypoint.authorization.entity.Account;
+import com.cairnfg.waypoint.authorization.entity.AccountRelationship;
 import com.cairnfg.waypoint.authorization.entity.RegisteredClient;
+import com.cairnfg.waypoint.authorization.repository.AccountRelationshipRepository;
 import com.cairnfg.waypoint.authorization.repository.AccountRepository;
 import com.cairnfg.waypoint.authorization.repository.PermissionRepository;
 import com.cairnfg.waypoint.authorization.repository.RegisteredClientRepository;
@@ -35,6 +37,8 @@ public class WaypointAuthorizationApiApp {
   @Autowired
   private RegisteredClientRepository registeredClientRepository;
   @Autowired
+  private AccountRelationshipRepository accountRelationshipRepository;
+  @Autowired
   private PasswordEncoder passwordEncoder;
 
   public static void main(String[] args) {
@@ -53,7 +57,7 @@ public class WaypointAuthorizationApiApp {
         .email("no@no.com")
         .password(passwordEncoder.encode("password"))
         .roles(List.of(roleRepository.findByName("Admin").get()))
-        .enabled(Boolean.TRUE)
+        .active(Boolean.TRUE)
         .address1("1600 Pennsylvania Avenue")
         .address2("Oval Office")
         .city("Washington")
@@ -68,7 +72,7 @@ public class WaypointAuthorizationApiApp {
         .build();
 
     try {
-      accountRepository.save(adminAccount);
+      adminAccount = accountRepository.save(adminAccount);
     } catch (Exception e) {
       //nothing to be done
     }
@@ -80,7 +84,7 @@ public class WaypointAuthorizationApiApp {
         .email("no@no.com")
         .password(passwordEncoder.encode("password"))
         .roles(List.of(roleRepository.findByName("User").get()))
-        .enabled(Boolean.TRUE)
+        .active(Boolean.TRUE)
         .address1("1600 Pennsylvania Avenue")
         .address2("Oval Office")
         .city("Washington")
@@ -95,10 +99,49 @@ public class WaypointAuthorizationApiApp {
         .build();
 
     try {
-      accountRepository.save(userAccount);
+      userAccount = accountRepository.save(userAccount);
     } catch (Exception e) {
       //nothing to be done
     }
+
+    Account dependentAccount = Account.builder()
+        .firstName("test_dependent")
+        .lastName("test_dependent")
+        .username("test_dependent")
+        .email("no@no.com")
+        .password(passwordEncoder.encode("password"))
+        .roles(List.of(roleRepository.findByName("User").get()))
+        .active(Boolean.TRUE)
+        .address1("1600 Pennsylvania Avenue")
+        .address2("Oval Office")
+        .city("Washington")
+        .state("District of Columbia")
+        .zip("12345")
+        .accountLocked(Boolean.FALSE)
+        .accountExpirationDate(LocalDateTime.now().plusYears(10))
+        .passwordExpirationDate(LocalDateTime.now().plusYears(10))
+        .acceptedPA(Boolean.TRUE)
+        .acceptedEULA(Boolean.TRUE)
+        .acceptedTC(Boolean.TRUE)
+        .build();
+
+    try {
+      dependentAccount = accountRepository.save(dependentAccount);
+    } catch (Exception e) {
+      //nothing to be done
+    }
+
+    AccountRelationship coClientRelationship = AccountRelationship.builder()
+        .mainAccount(adminAccount)
+        .coClient(userAccount)
+        .build();
+
+    AccountRelationship dependencyRelationship = AccountRelationship.builder()
+        .mainAccount(adminAccount)
+        .dependent(dependentAccount)
+        .build();
+
+    accountRelationshipRepository.saveAll(List.of(coClientRelationship, dependencyRelationship));
 
     RegisteredClient oidcClient = RegisteredClient.builder()
         .clientId("oidc-client")

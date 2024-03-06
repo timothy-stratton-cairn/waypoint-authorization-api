@@ -35,7 +35,7 @@ import org.springframework.security.oauth2.server.authorization.settings.TokenSe
 @Table(name = "oauth2_registered_client")
 public class RegisteredClient extends
     org.springframework.security.oauth2.server.authorization.client.RegisteredClient implements
-    BaseEntity<String>, Serializable {
+    IBaseEntity<String>, Serializable {
 
   @Serial
   private static final long serialVersionUID = 7526472295622776147L;
@@ -51,6 +51,10 @@ public class RegisteredClient extends
   private LocalDateTime updated;
   @lombok.Builder.Default
   private String modifiedBy = "system";
+
+  @lombok.Builder.Default
+  private Boolean active = Boolean.TRUE;
+
   private String clientId;
   private Instant clientIdIssuedAt;
   private String clientSecret;

@@ -8,22 +8,22 @@ databaseChangeLog:
       changes:
         - sql:
             dbms: 'h2, mysql'
-            sql: INSERT INTO permission (created, updated, modified_by, name, description) VALUES
-              (NOW(), NOW(), 'liquibase', 'protocol.template.create', 'Can create Protocol Templates'),
-              (NOW(), NOW(), 'liquibase', 'protocol.create', 'Can create Protocols'),
-              (NOW(), NOW(), 'liquibase', 'protocol.step.template.create', 'Can create Protocol Step Templates'),
-              (NOW(), NOW(), 'liquibase', 'protocol.step.template.category.create', 'Can create Protocol Step Template Categories'),
-              (NOW(), NOW(), 'liquibase', 'protocol.step.create', 'Can create Protocol Steps'),
-              (NOW(), NOW(), 'liquibase', 'protocol.step.task.create', 'Can create Protocol Step Tasks'),
-              (NOW(), NOW(), 'liquibase', 'protocol.step.status.create', 'Can create Protocol Step Statuses'),
-              (NOW(), NOW(), 'liquibase', 'homework.create', 'Can created a create Homework'),
-              (NOW(), NOW(), 'liquibase', 'homework.response.create', 'Can create Homework Responses'),
-              (NOW(), NOW(), 'liquibase', 'account.create', 'Can create User Accounts'),
-              (NOW(), NOW(), 'liquibase', 'role.create', 'Can create Roles'),
-              (NOW(), NOW(), 'liquibase', 'authorization.create', 'Can create Authorizations'),
-              (NOW(), NOW(), 'liquibase', 'permission.create', 'Can create Permissions'),
-              (NOW(), NOW(), 'liquibase', 'registered.client.create', 'Can create Registered Clients'),
-              (NOW(), NOW(), 'liquibase', 'account.create', 'Can create Accounts');
+            sql: INSERT INTO permission (created, updated, modified_by, name, description, active) VALUES
+              (NOW(), NOW(), 'liquibase', 'protocol.template.create', 'Can create Protocol Templates', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.create', 'Can create Protocols', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.template.create', 'Can create Protocol Step Templates', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.template.category.create', 'Can create Protocol Step Template Categories', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.create', 'Can create Protocol Steps', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.task.create', 'Can create Protocol Step Tasks', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.status.create', 'Can create Protocol Step Statuses', 1),
+              (NOW(), NOW(), 'liquibase', 'homework.create', 'Can created a create Homework', 1),
+              (NOW(), NOW(), 'liquibase', 'homework.response.create', 'Can create Homework Responses', 1),
+              (NOW(), NOW(), 'liquibase', 'account.create', 'Can create User Accounts', 1),
+              (NOW(), NOW(), 'liquibase', 'role.create', 'Can create Roles', 1),
+              (NOW(), NOW(), 'liquibase', 'authorization.create', 'Can create Authorizations', 1),
+              (NOW(), NOW(), 'liquibase', 'permission.create', 'Can create Permissions', 1),
+              (NOW(), NOW(), 'liquibase', 'registered.client.create', 'Can create Registered Clients', 1),
+              (NOW(), NOW(), 'liquibase', 'account.create', 'Can create Accounts', 1);
         - sql:
             dbms: 'h2, mysql'
             sql: INSERT INTO role_permission (role_id,permission_id)

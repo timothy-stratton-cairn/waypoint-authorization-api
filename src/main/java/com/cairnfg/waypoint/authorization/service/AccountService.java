@@ -32,6 +32,10 @@ public class AccountService implements UserDetailsService {
     return this.accountRepository.findByUsername(username);
   }
 
+  public Optional<Account> getAccountById(Long accountId) {
+    return this.accountRepository.findById(accountId);
+  }
+
   public List<Account> getAllAccounts() {
     return this.accountRepository.findAll();
   }
@@ -43,7 +47,7 @@ public class AccountService implements UserDetailsService {
     account.setAccountExpirationDate(LocalDateTime.now().plusYears(5)); //account expires in 5 years
     account.setPasswordExpirationDate(
         LocalDateTime.now().plusYears(1)); //password expires in 1 year
-    account.setEnabled(Boolean.TRUE);
+    account.setActive(Boolean.TRUE);
     account.setAccountLocked(Boolean.FALSE);
     account.setAcceptedTC(Boolean.FALSE);
     account.setAcceptedEULA(Boolean.FALSE);
