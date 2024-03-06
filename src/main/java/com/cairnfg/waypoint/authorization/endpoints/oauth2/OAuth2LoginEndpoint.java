@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
@@ -83,13 +82,11 @@ public class OAuth2LoginEndpoint {
 
   private ResponseEntity<SuccessfulLoginResponseDto> generateSuccessResponse(
       Authorization authorization, Date expiresAt) {
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-
     SuccessfulLoginResponseDto responseDto = SuccessfulLoginResponseDto.builder()
         .accessToken(authorization.getAccessToken())
         .refreshToken(authorization.getRefreshToken())
         .idToken(authorization.getIdToken())
-        .expiresAt(formatter.format(expiresAt))
+        .expiresIn(expiresAt.getTime() - new Date().getTime())
         .permissions(authorization.getAccount()
             .getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)

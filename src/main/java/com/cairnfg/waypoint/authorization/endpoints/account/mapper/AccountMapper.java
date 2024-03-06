@@ -1,7 +1,8 @@
 package com.cairnfg.waypoint.authorization.endpoints.account.mapper;
 
-import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountDetailsDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountDto;
+import com.cairnfg.waypoint.authorization.endpoints.account.dto.AddAccountDetailsDto;
+import com.cairnfg.waypoint.authorization.endpoints.account.dto.LinkedAccountDetailsDto;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,5 +16,7 @@ public interface AccountMapper {
   AccountDto toDto(Account account);
 
   @Mapping(target = "roles", ignore = true)
-  Account accountDetailsDtoToEntity(AccountDetailsDto userDetailsDto);
+  Account accountDetailsDtoToEntity(AddAccountDetailsDto userDetailsDto);
+
+  LinkedAccountDetailsDto accountToLinkedAccountDetailsDto(Account account);
 }

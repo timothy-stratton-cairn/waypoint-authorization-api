@@ -70,6 +70,9 @@ public class AES256 {
 
       byte[] decryptedText = cipher.doFinal(cipherText);
       return new String(decryptedText, StandardCharsets.UTF_8);
+    } catch (IllegalArgumentException e) {
+      // Assume this string is not encrypted
+      return strToDecrypt;
     } catch (Exception e) {
       // Handle the exception properly
       e.printStackTrace();

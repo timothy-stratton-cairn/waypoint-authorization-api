@@ -3,7 +3,7 @@ package com.cairnfg.waypoint.authorization.endpoints.account;
 import com.cairnfg.waypoint.authorization.dto.RequirementDto;
 import com.cairnfg.waypoint.authorization.dto.Status;
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
-import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountDetailsDto;
+import com.cairnfg.waypoint.authorization.endpoints.account.dto.AddAccountDetailsDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.mapper.AccountMapper;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Role;
@@ -44,7 +44,6 @@ public class AddAccountEndpoint {
     this.roleService = roleService;
   }
 
-
   //TODO need to actually validate the fields on the create user DTO
 
   @PostMapping(PATH)
@@ -52,7 +51,8 @@ public class AddAccountEndpoint {
   @Operation(
       summary = "Allows a user to create new accounts, linking the provided roles to the newly created account.",
       description =
-          "Allows a user to create new accounts, linking the provided roles to the newly created account." +
+          "Allows a user to create new accounts, linking the provided roles to the newly created account."
+              +
               " Requires the `account.create` permission.",
       security = @SecurityRequirement(name = "oAuth2JwtBearer"),
       responses = {
@@ -72,7 +72,7 @@ public class AddAccountEndpoint {
           @ApiResponse(responseCode = "409", description = "Not Found",
               content = {@Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorMessage.class))})})
-  public ResponseEntity<?> addAccount(@RequestBody AccountDetailsDto accountDetailsDto,
+  public ResponseEntity<?> addAccount(@RequestBody AddAccountDetailsDto accountDetailsDto,
       Principal principal) {
     log.info("User [{}] is attempting to create account with username [{}}", principal.getName(),
         accountDetailsDto.getUsername());
@@ -80,8 +80,9 @@ public class AddAccountEndpoint {
     if (this.accountService.findByUsername(accountDetailsDto.getUsername()).isPresent()) {
       return generateFailureResponse("User with username [" +
           accountDetailsDto.getUsername() + "] already exists", HttpStatus.CONFLICT);
-    } else if (PasswordUtility.validatePassword(accountDetailsDto.getPassword()).getOverallStatus().equals(
-        Status.FAILED)) {
+    } else if (PasswordUtility.validatePassword(accountDetailsDto.getPassword()).getOverallStatus()
+        .equals(
+            Status.FAILED)) {
       return generateFailureResponse(
           getPasswordComplexityViolations(accountDetailsDto.getPassword()),
           HttpStatus.BAD_REQUEST);
@@ -103,7 +104,8 @@ public class AddAccountEndpoint {
     }
   }
 
-  private Long createAccount(AccountDetailsDto accountDetailsDto, String modifiedBy, Set<Role> roles) {
+  private Long createAccount(AddAccountDetailsDto accountDetailsDto, String modifiedBy,
+      Set<Role> roles) {
     Account accountToCreate = AccountMapper.INSTANCE.accountDetailsDtoToEntity(accountDetailsDto);
 
     accountToCreate.setModifiedBy(modifiedBy);

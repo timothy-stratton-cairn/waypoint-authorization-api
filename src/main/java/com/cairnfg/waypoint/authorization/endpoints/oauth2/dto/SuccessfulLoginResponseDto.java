@@ -11,6 +11,6 @@ public class SuccessfulLoginResponseDto {
   private String accessToken;
   private String refreshToken;
   private String idToken;
-  private String expiresAt;
+  private Long expiresIn;
   private List<String> permissions;
 }

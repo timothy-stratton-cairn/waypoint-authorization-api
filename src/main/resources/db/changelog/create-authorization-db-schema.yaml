@@ -18,6 +18,7 @@ databaseChangeLog:
               `modified_by` varchar(255) DEFAULT NULL,
               `name` varchar(255) DEFAULT NULL,
               `description` varchar(255) DEFAULT NULL,
+              `active` bit(1) DEFAULT NULL,
               PRIMARY KEY (`id`)
               ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
   - changeSet:
@@ -47,10 +48,10 @@ databaseChangeLog:
               `account_locked` bit(1) DEFAULT NULL,
               `password_expiration_date` TIMESTAMP NOT NULL,
               `account_expiration_date`  TIMESTAMP NOT NULL,
-              `enabled` bit(1) DEFAULT NULL,
               `accepted_eula` bit(1) DEFAULT NULL,
               `accepted_pa` bit(1) DEFAULT NULL,
               `accepted_tc` bit(1) DEFAULT NULL,
+              `active` bit(1) DEFAULT NULL,
               PRIMARY KEY (`id`),
               CONSTRAINT `FK423r1fdahga2va2ev6aa740ab` UNIQUE (`username`)
               ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -87,6 +88,7 @@ databaseChangeLog:
               `modified_by` varchar(255) DEFAULT NULL,
               `name` varchar(255) DEFAULT NULL,
               `description` varchar(255) DEFAULT NULL,
+              `active` bit(1) DEFAULT NULL,
               PRIMARY KEY (`id`)
               ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
   - changeSet:
@@ -133,6 +135,7 @@ databaseChangeLog:
               `redirect_uris` text,
               `post_logout_redirect_uris` text,
               `scopes` text,
+              `active` bit(1) DEFAULT NULL,
               PRIMARY KEY (`registered_client_id`)
               ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
   - changeSet:
@@ -155,9 +158,33 @@ databaseChangeLog:
               `authorization_guid` varchar(255) DEFAULT NULL,
               `account_id` bigint DEFAULT NULL,
               `registered_client_id` bigint DEFAULT NULL,
+              `active` bit(1) DEFAULT NULL,
               PRIMARY KEY (`id`),
               CONSTRAINT `FK423r1qxlu7rskqcsghwn40fga` FOREIGN KEY (`account_id`) REFERENCES `account` (`id`),
               CONSTRAINT `FKd6y3hjkl6yf6u7sud8ry6oxfr` FOREIGN KEY (`registered_client_id`) REFERENCES `oauth2_registered_client` (`registered_client_id`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  - changeSet:
+      id: create-account_relationship-table
+      author: tstratton
+      changes:
+        - sql:
+            dbms: 'h2, mysql'
+            sql: DROP TABLE IF EXISTS `account_relationship`;
+        - sql:
+            dbms: 'h2, mysql'
+            sql: CREATE TABLE `account_relationship` (
+              `id` bigint NOT NULL AUTO_INCREMENT,
+              `created` DATETIME DEFAULT CURRENT_TIMESTAMP,
+              `updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              `modified_by` varchar(255) DEFAULT NULL,
+              `main_account_id` bigint NOT NULL,
+              `co_client_id` bigint DEFAULT NULL,
+              `dependent_id` bigint DEFAULT NULL,
+              `active` bit(1) DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              CONSTRAINT `FK423r1qxlu7rskqcsghwn40fgz` FOREIGN KEY (`main_account_id`) REFERENCES `account` (`id`),
+              CONSTRAINT `FK423r1qxlu7rskqcsghwn40fgy` FOREIGN KEY (`co_client_id`) REFERENCES `account` (`id`),
+              CONSTRAINT `FK423r1qxlu7rskqcsghwn40fgx` FOREIGN KEY (`dependent_id`) REFERENCES `account` (`id`)
               ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
