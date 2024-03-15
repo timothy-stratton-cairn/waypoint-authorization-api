@@ -3,6 +3,7 @@ package com.cairnfg.waypoint.authorization.endpoints.oauth2.service;
 import com.cairnfg.waypoint.authorization.endpoints.oauth2.dto.IdTokenInfoDto;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Authorization;
+import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AuthorizationService;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -68,7 +69,7 @@ public class OAuth2Service {
             Collections.singletonList(account.getUsername())) //audience should be RegisteredClient
         .claim("scope", account.getAuthorities().stream().map(GrantedAuthority::getAuthority)
             .collect(Collectors.joining(" ")))
-        .claim("groups", account.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+        .claim("groups", account.getRoles().stream().map(Role::getName)
             .collect(Collectors.toList()))
         .expirationTime(expirationTime)
         .notBeforeTime(Date.from(Instant.now())).issueTime(Date.from(Instant.now()))

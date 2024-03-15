@@ -30,7 +30,7 @@ public class GetAllRolesEndpoint {
   }
 
   @GetMapping(PATH)
-  @PreAuthorize("hasAuthority('SCOPE_role.read')")
+  @PreAuthorize("hasAnyAuthority('SCOPE_role.full', 'SCOPE_admin.full')")
   @Operation(
       summary = "Retrieves all roles.",
       description = "Retrieves all roles. Requires the `role.read` permission.",

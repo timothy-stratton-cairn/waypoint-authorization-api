@@ -22,5 +22,4 @@ databaseChangeLog:
               (NOW(), NOW(), 'liquibase', 'role.read', 'Can read/view Roles', 1),
               (NOW(), NOW(), 'liquibase', 'authorization.read', 'Can read/view Authorizations', 1),
               (NOW(), NOW(), 'liquibase', 'permission.read', 'Can read/view Permissions', 1),
-              (NOW(), NOW(), 'liquibase', 'registered.client.read', 'Can read/view Registered Clients', 1),
-              (NOW(), NOW(), 'liquibase', 'account.create', 'Can create Accounts', 1);
+              (NOW(), NOW(), 'liquibase', 'registered.client.read', 'Can read/view Registered Clients', 1);

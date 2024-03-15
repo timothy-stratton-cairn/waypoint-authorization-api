@@ -35,7 +35,7 @@ public class GetUserInfoEndpoint {
   }
 
   @GetMapping(PATH)
-  @PreAuthorize("hasAuthority('SCOPE_account.read')")
+  @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")
   @Operation(
       summary = "Retrieves information around the currently logged in user.",
       description = "Retrieves information around the currently logged in user. Requires the `account.read` permission.",

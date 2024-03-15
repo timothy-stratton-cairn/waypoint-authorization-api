@@ -22,9 +22,4 @@ databaseChangeLog:
               (NOW(), NOW(), 'liquibase', 'role.create', 'Can create Roles', 1),
               (NOW(), NOW(), 'liquibase', 'authorization.create', 'Can create Authorizations', 1),
               (NOW(), NOW(), 'liquibase', 'permission.create', 'Can create Permissions', 1),
-              (NOW(), NOW(), 'liquibase', 'registered.client.create', 'Can create Registered Clients', 1),
-              (NOW(), NOW(), 'liquibase', 'account.create', 'Can create Accounts', 1);
-        - sql:
-            dbms: 'h2, mysql'
-            sql: INSERT INTO role_permission (role_id,permission_id)
-              SELECT r.id, p.id FROM role r, permission p WHERE r.name = 'Admin';
+              (NOW(), NOW(), 'liquibase', 'registered.client.create', 'Can create Registered Clients', 1);

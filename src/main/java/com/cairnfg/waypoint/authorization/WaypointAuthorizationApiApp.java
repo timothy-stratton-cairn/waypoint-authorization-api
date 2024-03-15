@@ -51,12 +51,12 @@ public class WaypointAuthorizationApiApp {
   @PostConstruct
   void init() {
     Account adminAccount = Account.builder()
-        .firstName("test_name")
-        .lastName("test_name")
+        .firstName("test_admin")
+        .lastName("test_admin")
         .username("test_admin")
         .email("no@no.com")
         .password(passwordEncoder.encode("password"))
-        .roles(List.of(roleRepository.findByName("Admin").get()))
+        .roles(List.of(roleRepository.findByName("ADMIN").get()))
         .active(Boolean.TRUE)
         .address1("1600 Pennsylvania Avenue")
         .address2("Oval Office")
@@ -78,12 +78,12 @@ public class WaypointAuthorizationApiApp {
     }
 
     Account userAccount = Account.builder()
-        .firstName("test_name")
-        .lastName("test_name")
+        .firstName("test_user")
+        .lastName("test_user")
         .username("test_user")
         .email("no@no.com")
         .password(passwordEncoder.encode("password"))
-        .roles(List.of(roleRepository.findByName("User").get()))
+        .roles(List.of(roleRepository.findByName("USER").get()))
         .active(Boolean.TRUE)
         .address1("1600 Pennsylvania Avenue")
         .address2("Oval Office")
@@ -110,7 +110,7 @@ public class WaypointAuthorizationApiApp {
         .username("test_dependent")
         .email("no@no.com")
         .password(passwordEncoder.encode("password"))
-        .roles(List.of(roleRepository.findByName("User").get()))
+        .roles(List.of(roleRepository.findByName("USER").get()))
         .active(Boolean.TRUE)
         .address1("1600 Pennsylvania Avenue")
         .address2("Oval Office")
@@ -127,6 +127,33 @@ public class WaypointAuthorizationApiApp {
 
     try {
       dependentAccount = accountRepository.save(dependentAccount);
+    } catch (Exception e) {
+      //nothing to be done
+    }
+
+    Account clientAccount = Account.builder()
+        .firstName("test_client")
+        .lastName("test_client")
+        .username("test_client")
+        .email("no@no.com")
+        .password(passwordEncoder.encode("password"))
+        .roles(List.of(roleRepository.findByName("CLIENT").get()))
+        .active(Boolean.TRUE)
+        .address1("1600 Pennsylvania Avenue")
+        .address2("Oval Office")
+        .city("Washington")
+        .state("District of Columbia")
+        .zip("12345")
+        .accountLocked(Boolean.FALSE)
+        .accountExpirationDate(LocalDateTime.now().plusYears(10))
+        .passwordExpirationDate(LocalDateTime.now().plusYears(10))
+        .acceptedPA(Boolean.TRUE)
+        .acceptedEULA(Boolean.TRUE)
+        .acceptedTC(Boolean.TRUE)
+        .build();
+
+    try {
+      clientAccount = accountRepository.save(clientAccount);
     } catch (Exception e) {
       //nothing to be done
     }

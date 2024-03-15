@@ -22,9 +22,4 @@ databaseChangeLog:
               (NOW(), NOW(), 'liquibase', 'role.update', 'Can update Roles', 1),
               (NOW(), NOW(), 'liquibase', 'authorization.update', 'Can update Authorizations', 1),
               (NOW(), NOW(), 'liquibase', 'permission.update', 'Can update Permissions', 1),
-              (NOW(), NOW(), 'liquibase', 'registered.client.update', 'Can update Registered Clients', 1),
-              (NOW(), NOW(), 'liquibase', 'account.update', 'Can update Accounts', 1);
-        - sql:
-            dbms: 'h2, mysql'
-            sql: INSERT INTO role_permission (role_id,permission_id)
-              SELECT r.id, p.id FROM role r, permission p WHERE r.name = 'Admin';
+              (NOW(), NOW(), 'liquibase', 'registered.client.update', 'Can update Registered Clients', 1);

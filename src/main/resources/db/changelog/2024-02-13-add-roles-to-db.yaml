@@ -9,10 +9,6 @@ databaseChangeLog:
         - sql:
             dbms: 'h2, mysql'
             sql: INSERT INTO role (created, updated, modified_by, name, description, active) VALUES
-              (NOW(), NOW(), 'liquibase', 'Client', 'Clients are users who utilize a financial service', 1),
-              (NOW(), NOW(), 'liquibase', 'User', 'Users are employees of Financial Group with base level permissions to enter and edit data', 1),
-              (NOW(), NOW(), 'liquibase', 'Admin', 'Admin users are employees of the Financial Group with all permissions available', 1);
-        - sql:
-            dbms: 'h2, mysql'
-            sql: INSERT INTO role_permission (role_id,permission_id)
-              SELECT r.id, p.id FROM role r, permission p WHERE r.name = 'Admin';
+              (NOW(), NOW(), 'liquibase', 'CLIENT', 'Clients are users who utilize a financial service', 1),
+              (NOW(), NOW(), 'liquibase', 'USER', 'Users are employees of Financial Group with base level permissions to enter and edit data', 1),
+              (NOW(), NOW(), 'liquibase', 'ADMIN', 'Admin users are employees of the Financial Group with all permissions available', 1);

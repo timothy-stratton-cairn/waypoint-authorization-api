@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - preConditions:
+      onFail: HALT
+      onError: HALT
+  - changeSet:
+      id: truncate-role-permission-table
+      author: tstratton
+      changes:
+        - sql:
+            dbms: 'h2, mysql'
+            sql: TRUNCATE TABLE role_permission;
+  - changeSet:
+      id: add-new-permissions-to-permission-table
+      author: tstratton
+      changes:
+        - sql:
+            dbms: 'h2, mysql'
+            sql: INSERT INTO permission (created, updated, modified_by, name, description, active) VALUES
+              (NOW(), NOW(), 'liquibase', 'protocol.template.full', 'Can perform all operations related to Protocol Templates', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.full', 'Can perform all operations related to Protocols', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.template.full', 'Can perform all operations related to Protocol Step Templates', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.template.category.full', 'Can perform all operations related to Protocol Step Template Categories', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.full', 'Can perform all operations related to Protocol Steps', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.task.full', 'Can perform all operations related to Protocol Step Tasks', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.step.status.full', 'Can perform all operations related to Protocol Step Statuses', 1),
+              (NOW(), NOW(), 'liquibase', 'homework.template.full', 'Can created a perform all operations related to Homework', 1),
+              (NOW(), NOW(), 'liquibase', 'homework.full', 'Can created a perform all operations related to Homework', 1),
+              (NOW(), NOW(), 'liquibase', 'homework.question.full', 'Can perform all operations related to Homework Responses', 1),
+              (NOW(), NOW(), 'liquibase', 'homework.response.full', 'Can perform all operations related to Homework Responses', 1),
+              (NOW(), NOW(), 'liquibase', 'account.full', 'Can perform all operations related to User Accounts', 1),
+              (NOW(), NOW(), 'liquibase', 'role.full', 'Can perform all operations related to Roles', 1),
+              (NOW(), NOW(), 'liquibase', 'authorization.full', 'Can perform all operations related to Authorizations', 1),
+              (NOW(), NOW(), 'liquibase', 'permission.full', 'Can perform all operations related to Permissions', 1),
+              (NOW(), NOW(), 'liquibase', 'registered.client.full', 'Can perform all operations related to Registered Clients', 1),
+              (NOW(), NOW(), 'liquibase', 'admin.full', 'Can perform all operations', 1);
+        - sql:
+            dbms: 'h2, mysql'
+            sql: INSERT INTO role_permission (role_id,permission_id)
+              SELECT r.id, p.id FROM role r, permission p WHERE r.name = 'ADMIN' AND p.name = 'admin.full';
+        - sql:
+            dbms: 'h2, mysql'
+            sql: INSERT INTO role_permission (role_id,permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'USER'
+              AND p.name != 'admin.full'
+              AND p.name NOT LIKE '%template%'
+              AND p.name NOT LIKE '%question%';

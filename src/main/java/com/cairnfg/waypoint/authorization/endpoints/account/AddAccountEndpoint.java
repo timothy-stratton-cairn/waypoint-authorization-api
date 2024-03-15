@@ -47,7 +47,7 @@ public class AddAccountEndpoint {
   //TODO need to actually validate the fields on the create user DTO
 
   @PostMapping(PATH)
-  @PreAuthorize("hasAuthority('SCOPE_account.create')")
+  @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")
   @Operation(
       summary = "Allows a user to create new accounts, linking the provided roles to the newly created account.",
       description =

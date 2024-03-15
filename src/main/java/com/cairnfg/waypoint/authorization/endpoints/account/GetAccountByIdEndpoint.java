@@ -37,7 +37,7 @@ public class GetAccountByIdEndpoint {
   }
 
   @GetMapping(PATH)
-  @PreAuthorize("hasAuthority('SCOPE_account.read')")
+  @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")
   @Operation(
       summary = "Retrieves am account by it's ID.",
       description = "Retrieves an account by it's ID. Requires the `account.read` permission.",
