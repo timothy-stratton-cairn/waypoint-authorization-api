@@ -1,6 +1,15 @@
 waypoint:
   authorization:
     base-url: ${APP_BASE_URL}
+    dashboard-api:
+      base-url: ${DASHBOARD_API_BASE_URL}
+    encrypted-field:
+      secret-key: ${ENCRYPTED_FIELD_SECRET_KEY}
+      salt: ${ENCRYPTED_FIELD_SALT}
+    oauth2:
+      public-key: ${OAUTH2_PUBLIC_KEY}
+      private-key: ${OAUTH2_PRIVATE_KEY}
+
 
 spring:
   application:

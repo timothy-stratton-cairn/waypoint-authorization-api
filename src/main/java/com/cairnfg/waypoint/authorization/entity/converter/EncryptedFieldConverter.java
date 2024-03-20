@@ -2,12 +2,19 @@ package com.cairnfg.waypoint.authorization.entity.converter;
 
 import com.cairnfg.waypoint.authorization.configuration.cryptography.AES256;
 import jakarta.persistence.AttributeConverter;
+import org.springframework.beans.factory.annotation.Value;
 
 public class EncryptedFieldConverter implements AttributeConverter<String, String> {
 
-  //TODO These secrets should be stored in a secure place
-  private final String secretKey = "ldcAQwZs6EWmWJC#GVsx%*1s3RJfoabp%mfa@%9&BiDwQRjT$0qEvqLrj3jU2F0j$DHN5xVOGlQ*NUILqHZQparn8zWCVaM9GPB";
-  private final String salt = "zS95&#$yYWDLBUMM";
+  private final String secretKey;
+  private final String salt;
+
+  public EncryptedFieldConverter(
+      @Value("${waypoint.authorization.encrypted-field.secret-key}") String secretKey,
+      @Value("${waypoint.authorization.encrypted-field.salt}") String salt) {
+    this.secretKey = secretKey;
+    this.salt = salt;
+  }
 
   @Override
   public String convertToDatabaseColumn(String s) {

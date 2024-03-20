@@ -17,6 +17,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -39,12 +42,12 @@ public class AddAccountEndpoint {
   private final AccountService accountService;
   private final RoleService roleService;
 
+  private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
   public AddAccountEndpoint(AccountService accountService, RoleService roleService) {
     this.accountService = accountService;
     this.roleService = roleService;
   }
-
-  //TODO need to actually validate the fields on the create user DTO
 
   @PostMapping(PATH)
   @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")
@@ -77,7 +80,14 @@ public class AddAccountEndpoint {
     log.info("User [{}] is attempting to create account with username [{}}", principal.getName(),
         accountDetailsDto.getUsername());
 
-    if (this.accountService.findByUsername(accountDetailsDto.getUsername()).isPresent()) {
+    Set<ConstraintViolation<AddAccountDetailsDto>> violations = validator.validate(
+        accountDetailsDto);
+
+    if (!violations.isEmpty()) {
+      return generateFailureResponse(
+          violations.stream().map(ConstraintViolation::getMessage).collect(
+              Collectors.joining(", ")), HttpStatus.BAD_REQUEST);
+    } else if (this.accountService.findByUsername(accountDetailsDto.getUsername()).isPresent()) {
       return generateFailureResponse("User with username [" +
           accountDetailsDto.getUsername() + "] already exists", HttpStatus.CONFLICT);
     } else if (PasswordUtility.validatePassword(accountDetailsDto.getPassword()).getOverallStatus()

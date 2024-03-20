@@ -8,7 +8,6 @@ import com.cairnfg.waypoint.authorization.repository.AccountRepository;
 import com.cairnfg.waypoint.authorization.repository.PermissionRepository;
 import com.cairnfg.waypoint.authorization.repository.RegisteredClientRepository;
 import com.cairnfg.waypoint.authorization.repository.RoleRepository;
-import jakarta.annotation.PostConstruct;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,7 +47,7 @@ public class WaypointAuthorizationApiApp {
     log.info("App is running...");
   }
 
-  @PostConstruct
+  //  @PostConstruct
   void init() {
     Account adminAccount = Account.builder()
         .firstName("test_admin")

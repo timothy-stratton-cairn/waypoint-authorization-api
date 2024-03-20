@@ -16,8 +16,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = PasswordValidator.class)
 public @interface Password {
 
-  String message() default "Invalid Password";// TODO which message should we display: `Invalid
-  // Password`, `Enter a valid password`, etc.
+  String message() default "Invalid Password";
 
   Class<?>[] groups() default {};
 
