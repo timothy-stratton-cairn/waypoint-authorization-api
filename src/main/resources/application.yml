@@ -6,6 +6,7 @@ waypoint:
     encrypted-field:
       secret-key: ${ENCRYPTED_FIELD_SECRET_KEY}
       salt: ${ENCRYPTED_FIELD_SALT}
+      enabled: ${ENCRYPTED_FIELDS_ENABLED}
     oauth2:
       public-key: ${OAUTH2_PUBLIC_KEY}
       private-key: ${OAUTH2_PRIVATE_KEY}

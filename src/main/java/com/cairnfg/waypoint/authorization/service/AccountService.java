@@ -37,7 +37,7 @@ public class AccountService implements UserDetailsService {
   }
 
   public List<Account> getAllAccounts() {
-    return this.accountRepository.findAll();
+    return this.accountRepository.findAll().stream().distinct().toList();
   }
 
   public Long createAccount(Account account) {
