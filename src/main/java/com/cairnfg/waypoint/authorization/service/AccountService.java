@@ -44,6 +44,10 @@ public class AccountService implements UserDetailsService {
     return this.accountRepository.findAllById(ids).stream().distinct().toList();
   }
 
+  public Account saveAccount(Account account) {
+    return this.accountRepository.save(account);
+  }
+
   public Long createAccount(Account account) {
     account.setPassword(passwordEncoder.encode(account.getPassword()));
     account.setCreated(LocalDateTime.now());
