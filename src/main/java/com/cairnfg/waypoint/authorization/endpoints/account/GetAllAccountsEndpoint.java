@@ -47,7 +47,8 @@ public class GetAllAccountsEndpoint {
               content = {@Content(schema = @Schema(hidden = true))}),
           @ApiResponse(responseCode = "403", description = "Forbidden",
               content = {@Content(schema = @Schema(hidden = true))})})
-  public ResponseEntity<?> getAllAccounts(Principal principal, @RequestParam(value = "accountId") Optional<Long[]> optionalAccountIds) {
+  public ResponseEntity<?> getAllAccounts(Principal principal,
+      @RequestParam(value = "accountId") Optional<Long[]> optionalAccountIds) {
     final ResponseEntity<?>[] response = new ResponseEntity<?>[1];
     optionalAccountIds.ifPresentOrElse(
         accountIds -> response[0] = buildFilteredAccountList(accountIds, principal.getName()),
@@ -57,7 +58,8 @@ public class GetAllAccountsEndpoint {
     return response[0];
   }
 
-  private ResponseEntity<AccountListDto> buildFilteredAccountList(Long[] accountIds, String modifiedBy) {
+  private ResponseEntity<AccountListDto> buildFilteredAccountList(Long[] accountIds,
+      String modifiedBy) {
     log.info("User [{}] is Retrieving Accounts with ID List [{}]", modifiedBy,
         accountIds);
     return ResponseEntity.ok(

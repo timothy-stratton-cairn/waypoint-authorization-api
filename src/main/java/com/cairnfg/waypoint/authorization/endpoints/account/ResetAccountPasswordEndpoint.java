@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Tag(name = "Account")
 public class ResetAccountPasswordEndpoint {
+
   public static final String PATH = "/api/account/{accountId}/reset-password";
 
   private final AccountService accountService;
@@ -44,7 +45,8 @@ public class ResetAccountPasswordEndpoint {
   }
 
   @PostMapping(PATH)
-  @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")@Operation(
+  @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")
+  @Operation(
       summary = "Reset an account's password with the provided new password.",
       description = "Reset an account's password with the provided new password. Requires the `account.full` permission.",
       security = @SecurityRequirement(name = "oAuth2JwtBearer"),
@@ -68,16 +70,22 @@ public class ResetAccountPasswordEndpoint {
     Optional<Account> accountToBeUpdated;
 
     if ((accountToBeUpdated = this.accountService.getAccountById(accountId)).isEmpty()) {
-      return generateFailureResponse("Account with ID [" + accountId + "] not found", HttpStatus.NOT_FOUND);
+      return generateFailureResponse("Account with ID [" + accountId + "] not found",
+          HttpStatus.NOT_FOUND);
     } else {
       Account validAccount = accountToBeUpdated.get();
 
       if (!passwordEncoder.matches(passwordResetDto.getOldPassword(), validAccount.getPassword())) {
-        return generateFailureResponse("Provided Old Password does not Match Old Password on Account", HttpStatus.UNPROCESSABLE_ENTITY);
+        return generateFailureResponse(
+            "Provided Old Password does not Match Old Password on Account",
+            HttpStatus.UNPROCESSABLE_ENTITY);
       }
 
-      if (PasswordUtility.validatePassword(passwordResetDto.getNewPassword()).getOverallStatus().equals(Status.FAILED)) {
-        return generateFailureResponse(getPasswordComplexityViolations(passwordResetDto.getNewPassword()), HttpStatus.BAD_REQUEST);
+      if (PasswordUtility.validatePassword(passwordResetDto.getNewPassword()).getOverallStatus()
+          .equals(Status.FAILED)) {
+        return generateFailureResponse(
+            getPasswordComplexityViolations(passwordResetDto.getNewPassword()),
+            HttpStatus.BAD_REQUEST);
       }
 
       validAccount.setModifiedBy(principal.getName());
