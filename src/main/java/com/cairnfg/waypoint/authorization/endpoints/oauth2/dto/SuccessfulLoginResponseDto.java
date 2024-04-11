@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 public class SuccessfulLoginResponseDto {
 
+  private Long accountId;
   private String accessToken;
   private String refreshToken;
   private String idToken;

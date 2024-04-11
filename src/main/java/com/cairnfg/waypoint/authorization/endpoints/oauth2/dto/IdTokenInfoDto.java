@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Data
@@ -13,8 +14,11 @@ public class IdTokenInfoDto {
 
   @JsonIgnore
   public static final IdTokenInfoDtoMapper MAPPER = IdTokenInfoDtoMapper.INSTANCE;
+
+  private Long accountId;
   private String username;
   private String firstName;
+  private String lastName;
   private String email;
   private Boolean acceptedTC; //terms and conditions
   private Boolean acceptedEULA; //end-user licensing agreement
@@ -25,7 +29,7 @@ public class IdTokenInfoDto {
 
     IdTokenInfoDtoMapper INSTANCE = Mappers.getMapper(IdTokenInfoDtoMapper.class);
 
-
+    @Mapping(source = "id", target = "accountId")
     IdTokenInfoDto accountToIdTokenInfoDto(Account account);
   }
 }

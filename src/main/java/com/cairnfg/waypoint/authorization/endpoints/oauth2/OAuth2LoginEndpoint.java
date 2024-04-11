@@ -83,6 +83,7 @@ public class OAuth2LoginEndpoint {
   private ResponseEntity<SuccessfulLoginResponseDto> generateSuccessResponse(
       Authorization authorization, Date expiresAt) {
     SuccessfulLoginResponseDto responseDto = SuccessfulLoginResponseDto.builder()
+        .accountId(authorization.getAccount().getId())
         .accessToken(authorization.getAccessToken())
         .refreshToken(authorization.getRefreshToken())
         .idToken(authorization.getIdToken())
