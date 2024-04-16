@@ -10,4 +10,7 @@ EXPOSE 8080
 
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
 
-ENTRYPOINT [ "java","-jar", "waypoint-authorization-api.jar" ]
+COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT [ "sh","/entrypoint.sh" ]
