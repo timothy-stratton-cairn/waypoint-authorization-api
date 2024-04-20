@@ -109,6 +109,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.github.javafaker</groupId>
+      <artifactId>javafaker</artifactId>
+      <version>${javafaker.version}</version>
+    </dependency>
+
+    <dependency>
       <artifactId>spring-boot-starter-test</artifactId>
       <groupId>org.springframework.boot</groupId>
       <scope>test</scope>
@@ -141,6 +147,7 @@
     <mysql-connector-j.version>8.2.0</mysql-connector-j.version>
     <org.mapstruct.version>1.6.0.Beta1</org.mapstruct.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <javafaker.version>1.0.2</javafaker.version>
   </properties>
 
   <version>0.0.1</version>
