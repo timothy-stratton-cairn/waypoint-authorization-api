@@ -1,7 +1,8 @@
 package com.cairnfg.waypoint.authorization.endpoints.account;
 
+import com.cairnfg.waypoint.authorization.dto.RequirementDto;
+import com.cairnfg.waypoint.authorization.dto.Status;
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
-import com.cairnfg.waypoint.authorization.endpoints.account.dto.AddAccountDetailsDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.AddAccountResponseDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.BatchAddAccountDetailsDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.BatchAddAccountDetailsListDto;
@@ -11,6 +12,7 @@ import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
 import com.cairnfg.waypoint.authorization.service.RoleService;
+import com.cairnfg.waypoint.authorization.utility.PasswordUtility;
 import com.github.javafaker.Faker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,16 +24,16 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import java.security.Principal;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.security.Principal;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -53,9 +55,9 @@ public class BatchAddAccountsEndpoint {
   @PostMapping(PATH)
   @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")
   @Operation(
-      summary = "Allows a user to create new accounts, linking the provided roles to the newly created account.",
+      summary = "Allows a user to create new accounts in a batch, linking the provided roles to the newly created accounts.",
       description =
-          "Allows a user to create new accounts, linking the provided roles to the newly created account."
+          "Allows a user to create new accounts in a batch, linking the provided roles to the newly created accounts."
               +
               " Requires the `account.create` permission.",
       security = @SecurityRequirement(name = "oAuth2JwtBearer"),
@@ -67,20 +69,49 @@ public class BatchAddAccountsEndpoint {
           @ApiResponse(responseCode = "403", description = "Forbidden",
               content = {@Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorMessage.class))})})
-  public ResponseEntity<BatchAddAccountsResponseDto> addAccount(@RequestBody BatchAddAccountDetailsListDto batchAddAccountDetailsListDto,
+  public ResponseEntity<BatchAddAccountsResponseDto> addAccount(
+      @RequestBody BatchAddAccountDetailsListDto batchAddAccountDetailsListDto,
       Principal principal) {
-    log.info("User [{}] is attempting to create [{}] account with usernames [{}}", principal.getName(),
-            batchAddAccountDetailsListDto.getNumOfAccounts(), batchAddAccountDetailsListDto.getAccountBatch().stream()
-                    .map(BatchAddAccountDetailsDto::getUsername).collect(Collectors.joining(", ")));
+    log.info("User [{}] is attempting to create [{}] account with usernames [{}}",
+        principal.getName(),
+        batchAddAccountDetailsListDto.getNumOfAccounts(),
+        batchAddAccountDetailsListDto.getAccountBatch().stream()
+            .map(BatchAddAccountDetailsDto::getUsername).collect(Collectors.joining(", ")));
 
-    return ResponseEntity.ok(BatchAddAccountsResponseDto.builder()
-            .accountCreationResponses(batchAddAccountDetailsListDto.getAccountBatch().stream()
-                .map(accountToBeCreated -> this.setupAndCreateAccount(accountToBeCreated, principal.getName()))
-                .toList())
-            .build());
+    BatchAddAccountsResponseDto responseDto = BatchAddAccountsResponseDto.builder()
+        .accountCreationResponses(batchAddAccountDetailsListDto.getAccountBatch().stream()
+            .map(accountToBeCreated -> this.setupAndCreateAccounts(accountToBeCreated,
+                principal.getName()))
+            .toList())
+        .build();
+
+    for (BatchAddAccountDetailsDto addAccountResponseDto : batchAddAccountDetailsListDto.getAccountBatch()) {
+      this.accountService.findByUsername(addAccountResponseDto.getUsername())
+          .ifPresentOrElse(
+              account -> setupAccountAssociation(addAccountResponseDto, account),
+              () -> log.debug("Nothing to be done for uncreated account [{}]",
+                  addAccountResponseDto.getUsername()));
+    }
+
+    return ResponseEntity.ok(responseDto);
   }
 
-  private AddAccountResponseDto setupAndCreateAccount(BatchAddAccountDetailsDto accountDetailsDto, String modifiedBy) {
+  private void setupAccountAssociation(BatchAddAccountDetailsDto addAccountResponseDto,
+      Account account) {
+    Optional<Account> relatedAccount;
+    if ((relatedAccount = this.accountService.findByUsername(
+        addAccountResponseDto.getCoClientUsername())).isPresent()) {
+      account.setCoClient(relatedAccount.get());
+      this.accountService.saveAccount(account);
+    } else if ((relatedAccount = this.accountService.findByUsername(
+        addAccountResponseDto.getParentAccountUsername())).isPresent()) {
+      relatedAccount.get().getDependents().add(account);
+      this.accountService.saveAccount(relatedAccount.get());
+    }
+  }
+
+  private AddAccountResponseDto setupAndCreateAccounts(BatchAddAccountDetailsDto accountDetailsDto,
+      String modifiedBy) {
     Set<ConstraintViolation<BatchAddAccountDetailsDto>> violations = validator.validate(
         accountDetailsDto);
 
@@ -93,10 +124,21 @@ public class BatchAddAccountsEndpoint {
           .build();
     } else if (this.accountService.findByUsername(accountDetailsDto.getUsername()).isPresent()) {
       return AddAccountResponseDto.builder()
+          .accountId(
+              this.accountService.findByUsername(accountDetailsDto.getUsername()).get().getId())
           .username(accountDetailsDto.getUsername())
-          .error(Boolean.TRUE)
+          .error(Boolean.FALSE)
           .message("User with username [" +
               accountDetailsDto.getUsername() + "] already exists")
+          .build();
+    } else if (accountDetailsDto.getPassword() != null &&
+        !accountDetailsDto.getPassword().isEmpty() &&
+        PasswordUtility.validatePassword(accountDetailsDto.getPassword()).getOverallStatus()
+            .equals(Status.FAILED)) {
+      return AddAccountResponseDto.builder()
+          .username(accountDetailsDto.getUsername())
+          .error(Boolean.TRUE)
+          .message(getPasswordComplexityViolations(accountDetailsDto.getPassword()))
           .build();
     }
 
@@ -114,7 +156,7 @@ public class BatchAddAccountsEndpoint {
     Account createdAccount = createAccount(
         accountDetailsDto,
         Faker.instance().internet()
-          .password(8,36, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
+            .password(8, 36, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
         modifiedBy,
         roles);
 
@@ -126,14 +168,23 @@ public class BatchAddAccountsEndpoint {
         .build();
   }
 
-  private Account createAccount(BatchAddAccountDetailsDto accountDetailsDto, String password, String modifiedBy,
+  private Account createAccount(BatchAddAccountDetailsDto accountDetailsDto, String password,
+      String modifiedBy,
       Set<Role> roles) {
     Account accountToCreate = AccountMapper.INSTANCE.accountDetailsDtoToEntity(accountDetailsDto);
 
     accountToCreate.setModifiedBy(modifiedBy);
-    accountToCreate.setPassword(password);
+    accountToCreate.setPassword(accountDetailsDto.getPassword() == null ||
+        accountDetailsDto.getPassword().isEmpty() ? password : accountDetailsDto.getPassword());
     accountToCreate.setRoles(roles);
 
     return accountService.createAccount(accountToCreate);
+  }
+
+  private String getPasswordComplexityViolations(String password) {
+    return PasswordUtility.validatePassword(password).getRequirements()
+        .stream()
+        .filter(requirementDto -> requirementDto.getStatus().equals(Status.FAILED))
+        .map(RequirementDto::getMessage).collect(Collectors.joining(", "));
   }
 }

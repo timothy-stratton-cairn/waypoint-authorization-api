@@ -10,8 +10,8 @@ import lombok.Data;
 @JsonInclude(Include.NON_NULL)
 public class AddAccountResponseDto {
 
-    private Long accountId;
-    private String username;
-    private Boolean error;
-    private String message;
+  private Long accountId;
+  private String username;
+  private Boolean error;
+  private String message;
 }

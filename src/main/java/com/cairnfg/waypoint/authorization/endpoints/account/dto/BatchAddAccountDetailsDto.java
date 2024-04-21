@@ -44,4 +44,6 @@ public class BatchAddAccountDetailsDto {
 
   private String coClientUsername;
   private String parentAccountUsername;
+
+  private String password;
 }
