@@ -31,7 +31,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Data
 @Entity
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"coClient", "dependents"})
 @NoArgsConstructor
 @AllArgsConstructor
 @SQLRestriction("active=1")
