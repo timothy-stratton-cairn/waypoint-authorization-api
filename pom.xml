@@ -55,8 +55,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
+      <groupId>org.springframework.boot</groupId>
     </dependency>
 
     <dependency>
@@ -109,6 +109,12 @@
     </dependency>
 
     <dependency>
+      <artifactId>javafaker</artifactId>
+      <groupId>com.github.javafaker</groupId>
+      <version>${javafaker.version}</version>
+    </dependency>
+
+    <dependency>
       <artifactId>spring-boot-starter-test</artifactId>
       <groupId>org.springframework.boot</groupId>
       <scope>test</scope>
@@ -133,6 +139,7 @@
   <properties>
     <HikariCP.version>5.1.0</HikariCP.version>
     <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
+    <javafaker.version>1.0.2</javafaker.version>
     <liquibase-core.version>4.25.1</liquibase-core.version>
     <lombok.version>1.18.30</lombok.version>
     <maven.compiler.source>17</maven.compiler.source>

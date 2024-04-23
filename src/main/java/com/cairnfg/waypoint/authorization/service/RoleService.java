@@ -28,4 +28,12 @@ public class RoleService {
                 () -> new EntityNotFoundException("Role with ID [" + roleId + "] not found")))
         .collect(Collectors.toSet());
   }
+
+  public Set<Role> getRolesByName(Set<String> roleNamesList) {
+    return roleNamesList.stream()
+        .map(roleName -> this.roleRepository.findByName(roleName.toUpperCase())
+            .orElseThrow(
+                () -> new EntityNotFoundException("Role with Name [" + roleName + "] not found")))
+        .collect(Collectors.toSet());
+  }
 }

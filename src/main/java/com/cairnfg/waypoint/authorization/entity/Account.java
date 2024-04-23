@@ -116,4 +116,11 @@ public class Account extends BaseEntity implements IBaseEntity<Long>, UserDetail
   public boolean isEnabled() {
     return this.getActive();
   }
+
+  public Set<Account> getDependents() {
+    if (dependents == null) {
+      dependents = new LinkedHashSet<>();
+    }
+    return dependents;
+  }
 }

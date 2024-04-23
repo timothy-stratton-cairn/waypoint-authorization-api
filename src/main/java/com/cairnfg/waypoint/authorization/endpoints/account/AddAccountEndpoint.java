@@ -121,7 +121,7 @@ public class AddAccountEndpoint {
     accountToCreate.setModifiedBy(modifiedBy);
     accountToCreate.setRoles(roles);
 
-    return accountService.createAccount(accountToCreate);
+    return accountService.createAccount(accountToCreate).getId();
   }
 
   private String getPasswordComplexityViolations(String password) {

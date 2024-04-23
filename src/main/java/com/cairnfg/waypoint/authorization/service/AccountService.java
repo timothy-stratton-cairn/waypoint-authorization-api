@@ -48,7 +48,7 @@ public class AccountService implements UserDetailsService {
     return this.accountRepository.save(account);
   }
 
-  public Long createAccount(Account account) {
+  public Account createAccount(Account account) {
     account.setPassword(passwordEncoder.encode(account.getPassword()));
     account.setCreated(LocalDateTime.now());
     account.setUpdated((LocalDateTime.now()));
@@ -61,6 +61,6 @@ public class AccountService implements UserDetailsService {
     account.setAcceptedEULA(Boolean.FALSE);
     account.setAcceptedPA(Boolean.FALSE);
 
-    return this.accountRepository.save(account).getId();
+    return this.accountRepository.save(account);
   }
 }
