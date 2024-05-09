@@ -3,6 +3,7 @@ package com.cairnfg.waypoint.authorization.endpoints.account;
 import com.cairnfg.waypoint.authorization.dto.RequirementDto;
 import com.cairnfg.waypoint.authorization.dto.Status;
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
+import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountDetailsDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.AddAccountDetailsDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.mapper.AccountMapper;
 import com.cairnfg.waypoint.authorization.entity.Account;
@@ -60,7 +61,9 @@ public class AddAccountEndpoint {
       security = @SecurityRequirement(name = "oAuth2JwtBearer"),
       responses = {
           @ApiResponse(responseCode = "201",
-              description = "Created - Account creation was successful"),
+              description = "Created - Account creation was successful",
+              content = {@Content(mediaType = "application/json",
+                  schema = @Schema(implementation = AccountDetailsDto.class))}),
           @ApiResponse(responseCode = "400", description = "Bad Request",
               content = {@Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorMessage.class))}),
@@ -104,24 +107,39 @@ public class AddAccountEndpoint {
         return generateFailureResponse(e.getMessage(), HttpStatus.NOT_FOUND);
       }
 
-      Long createdAccountId = createAccount(accountDetailsDto, principal.getName(), roles);
+      Account createdAccount = createAccount(accountDetailsDto, principal.getName(), roles);
 
       log.info("Account [{}] created successfully with ID [{}]", accountDetailsDto.getUsername(),
-          createdAccountId);
+          createdAccount.getId());
 
       return ResponseEntity.status(HttpStatus.CREATED)
-          .body("Account [" + accountDetailsDto.getUsername() + "] created successfully");
+          .body(
+              AccountDetailsDto.builder()
+                  .id(createdAccount.getId())
+                  .username(createdAccount.getUsername())
+                  .firstName(createdAccount.getFirstName())
+                  .lastName(createdAccount.getLastName())
+                  .email(createdAccount.getEmail())
+                  .roles(createdAccount.getRoles().stream()
+                      .map(Role::getName)
+                      .collect(Collectors.toSet()))
+                  .coClient(AccountMapper.INSTANCE.accountToLinkedAccountDetailsDto(
+                      createdAccount.getCoClient()))
+                  .dependents(createdAccount.getDependents().stream()
+                      .map(AccountMapper.INSTANCE::accountToLinkedAccountDetailsDto)
+                      .collect(Collectors.toSet()))
+                  .build());
     }
   }
 
-  private Long createAccount(AddAccountDetailsDto accountDetailsDto, String modifiedBy,
+  private Account createAccount(AddAccountDetailsDto accountDetailsDto, String modifiedBy,
       Set<Role> roles) {
     Account accountToCreate = AccountMapper.INSTANCE.accountDetailsDtoToEntity(accountDetailsDto);
 
     accountToCreate.setModifiedBy(modifiedBy);
     accountToCreate.setRoles(roles);
 
-    return accountService.createAccount(accountToCreate).getId();
+    return accountService.createAccount(accountToCreate);
   }
 
   private String getPasswordComplexityViolations(String password) {

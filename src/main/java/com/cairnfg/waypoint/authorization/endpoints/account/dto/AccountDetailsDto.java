@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 public class AccountDetailsDto {
 
+  private Long id;
   private String username;
   private String firstName;
   private String lastName;

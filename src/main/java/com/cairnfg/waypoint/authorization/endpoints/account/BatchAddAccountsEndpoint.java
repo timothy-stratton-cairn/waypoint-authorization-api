@@ -63,7 +63,9 @@ public class BatchAddAccountsEndpoint {
       security = @SecurityRequirement(name = "oAuth2JwtBearer"),
       responses = {
           @ApiResponse(responseCode = "200",
-              description = "Created - Account creation was successful"),
+              description = "Created - Account creation was successful",
+              content = {@Content(mediaType = "application/json",
+                  schema = @Schema(implementation = BatchAddAccountsResponseDto.class))}),
           @ApiResponse(responseCode = "401", description = "Unauthorized",
               content = {@Content(schema = @Schema(hidden = true))}),
           @ApiResponse(responseCode = "403", description = "Forbidden",

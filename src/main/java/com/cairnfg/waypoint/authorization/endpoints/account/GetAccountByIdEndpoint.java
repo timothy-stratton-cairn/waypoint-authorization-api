@@ -74,6 +74,7 @@ public class GetAccountByIdEndpoint {
       Account returnedAccount) {
     return ResponseEntity.ok(
         AccountDetailsDto.builder()
+            .id(returnedAccount.getId())
             .username(returnedAccount.getUsername())
             .firstName(returnedAccount.getFirstName())
             .lastName(returnedAccount.getLastName())
