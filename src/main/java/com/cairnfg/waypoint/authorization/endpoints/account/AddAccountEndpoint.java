@@ -18,17 +18,22 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,6 +55,7 @@ public class AddAccountEndpoint {
     this.roleService = roleService;
   }
 
+  @Transactional
   @PostMapping(PATH)
   @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")
   @Operation(
@@ -108,6 +114,44 @@ public class AddAccountEndpoint {
       }
 
       Account createdAccount = createAccount(accountDetailsDto, principal.getName(), roles);
+
+      Optional<Account> coClientAccountOptional;
+
+      if (accountDetailsDto.getCoClientId() != null) {
+        if ((coClientAccountOptional = this.accountService.getAccountById(
+            accountDetailsDto.getCoClientId())).isEmpty()) {
+          TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+          return generateFailureResponse("Account with ID [" + accountDetailsDto.getCoClientId()
+                  + "] specified for the Co-Client not found",
+              HttpStatus.NOT_FOUND);
+        } else {
+          createdAccount.setCoClient(coClientAccountOptional.get());
+
+          coClientAccountOptional.get().setCoClient(createdAccount);
+        }
+      }
+
+      if (accountDetailsDto.getDependentIds() != null) {
+        List<Account> dependentAccounts = this.accountService.getAccountListsByIdList(
+            accountDetailsDto.getDependentIds().stream().toList());
+
+        if (!dependentAccounts.stream()
+            .map(Account::getId)
+            .collect(Collectors.toSet())
+            .containsAll(accountDetailsDto.getDependentIds())) {
+          TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+          return generateFailureResponse(
+              "Provided Account IDs for Dependents [" + accountDetailsDto.getDependentIds().stream()
+                  .map(Object::toString)
+                  .collect(Collectors.joining(","))
+                  + "]  not found",
+              HttpStatus.NOT_FOUND);
+        }
+
+        createdAccount.setDependents(new HashSet<>(dependentAccounts));
+      }
+
+      accountService.saveAccount(createdAccount);
 
       log.info("Account [{}] created successfully with ID [{}]", accountDetailsDto.getUsername(),
           createdAccount.getId());

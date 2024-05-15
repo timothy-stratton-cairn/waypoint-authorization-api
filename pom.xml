@@ -60,6 +60,11 @@
     </dependency>
 
     <dependency>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+
+    <dependency>
       <artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
       <groupId>org.springframework.boot</groupId>
     </dependency>

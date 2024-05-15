@@ -36,4 +36,7 @@ public class AddAccountDetailsDto {
   private String email;
 
   private String password;
+
+  private Long coClientId;
+  private Set<Long> dependentIds;
 }
