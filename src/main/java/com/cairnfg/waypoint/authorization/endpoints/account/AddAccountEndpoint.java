@@ -7,8 +7,10 @@ import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountDetailsDt
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.AddAccountDetailsDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.mapper.AccountMapper;
 import com.cairnfg.waypoint.authorization.entity.Account;
+import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
+import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import com.cairnfg.waypoint.authorization.service.RoleService;
 import com.cairnfg.waypoint.authorization.utility.PasswordUtility;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +26,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -49,10 +52,13 @@ public class AddAccountEndpoint {
   private final RoleService roleService;
 
   private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+  private final HouseholdService householdService;
 
-  public AddAccountEndpoint(AccountService accountService, RoleService roleService) {
+  public AddAccountEndpoint(AccountService accountService, RoleService roleService,
+      HouseholdService householdService) {
     this.accountService = accountService;
     this.roleService = roleService;
+    this.householdService = householdService;
   }
 
   @Transactional
@@ -114,7 +120,7 @@ public class AddAccountEndpoint {
       }
 
       Account createdAccount = createAccount(accountDetailsDto, principal.getName(), roles);
-
+      Household household = null;
       Optional<Account> coClientAccountOptional;
 
       if (accountDetailsDto.getCoClientId() != null) {
@@ -128,6 +134,35 @@ public class AddAccountEndpoint {
           createdAccount.setCoClient(coClientAccountOptional.get());
 
           coClientAccountOptional.get().setCoClient(createdAccount);
+
+          if (coClientAccountOptional.get().getHousehold() != null) {
+            household = coClientAccountOptional.get().getHousehold();
+            createdAccount.setHousehold(coClientAccountOptional.get().getHousehold());
+          } else {
+            household = Household.builder()
+                .modifiedBy(principal.getName())
+                .name(
+                    createdAccount.getLastName().equals(coClientAccountOptional.get().getLastName())
+                        ?
+                        createdAccount.getLastName() + " Household" :
+                        createdAccount.getLastName() + "/" + coClientAccountOptional.get()
+                            .getLastName() + " Household")
+                .description(
+                    createdAccount.getLastName().equals(coClientAccountOptional.get().getLastName())
+                        ?
+                        createdAccount.getLastName() + " Household" :
+                        createdAccount.getLastName() + "/" + coClientAccountOptional.get()
+                            .getLastName() + " Household")
+                .householdAccounts(new HashSet<>(
+                    Arrays.asList(createdAccount, coClientAccountOptional.get())))
+                .primaryContact(createdAccount)
+                .build();
+
+            household = this.householdService.saveHousehold(household);
+
+            createdAccount.setHousehold(household);
+            coClientAccountOptional.get().setHousehold(household);
+          }
         }
       }
 
@@ -147,6 +182,24 @@ public class AddAccountEndpoint {
                   + "]  not found",
               HttpStatus.NOT_FOUND);
         }
+
+        if (household == null) {
+          Set<Account> householdAccounts = new HashSet<>(dependentAccounts);
+          householdAccounts.add(createdAccount);
+
+          household = Household.builder()
+              .name(createdAccount.getLastName() + " Household")
+              .description(createdAccount.getLastName() + " Household")
+              .householdAccounts(householdAccounts)
+              .primaryContact(createdAccount)
+              .build();
+
+          household = this.householdService.saveHousehold(household);
+        }
+
+        Household finalHousehold = household;
+        dependentAccounts.forEach(dependentAccount -> dependentAccount.setHousehold(
+            finalHousehold));
 
         createdAccount.setDependents(new HashSet<>(dependentAccounts));
       }
@@ -195,6 +248,7 @@ public class AddAccountEndpoint {
 
   private ResponseEntity<ErrorMessage> generateFailureResponse(String message, HttpStatus status) {
     log.warn(message);
+    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
     return new ResponseEntity<>(
         ErrorMessage.builder()
             .path(PATH)

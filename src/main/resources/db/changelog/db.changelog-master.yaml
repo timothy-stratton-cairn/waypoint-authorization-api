@@ -11,3 +11,5 @@ databaseChangeLog:
       file: db/changelog/2024-02-25-add-update-permissions-to-db.yaml
   - include:
       file: db/changelog/2024-03-15-reset-permissions-to-agreed-upon-updates.yaml
+  - include:
+      file: db/changelog/2024-05-17-add-household-details-to-system.yaml

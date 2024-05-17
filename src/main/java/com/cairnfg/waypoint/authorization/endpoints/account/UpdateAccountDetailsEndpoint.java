@@ -3,7 +3,9 @@ package com.cairnfg.waypoint.authorization.endpoints.account;
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.UpdateAccountDetailsDto;
 import com.cairnfg.waypoint.authorization.entity.Account;
+import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.service.AccountService;
+import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import com.cairnfg.waypoint.authorization.service.ProtocolService;
 import com.cairnfg.waypoint.authorization.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,11 +15,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -45,12 +49,14 @@ public class UpdateAccountDetailsEndpoint {
 
   private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
   private final ProtocolService protocolService;
+  private final HouseholdService householdService;
 
   public UpdateAccountDetailsEndpoint(AccountService accountService, RoleService roleService,
-      ProtocolService protocolService) {
+      ProtocolService protocolService, HouseholdService householdService) {
     this.accountService = accountService;
     this.roleService = roleService;
     this.protocolService = protocolService;
+    this.householdService = householdService;
   }
 
   /**
@@ -61,6 +67,7 @@ public class UpdateAccountDetailsEndpoint {
    * @param principal         The principal object representing the currently authenticated user.
    * @return A ResponseEntity containing the result of the account update operation.
    */
+  @Transactional
   @PatchMapping(PATH)
   @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")
   @Operation(
@@ -107,6 +114,7 @@ public class UpdateAccountDetailsEndpoint {
 
       Optional<Account> coClientAccountOptional;
       Account accountToUpdate = accountToUpdateOptional.get();
+      Household household = accountToUpdate.getHousehold();
       accountToUpdate.setModifiedBy(principal.getName());
 
       if (accountDetailsDto.getRoleIds() != null) {
@@ -128,6 +136,35 @@ public class UpdateAccountDetailsEndpoint {
           accountToUpdate.setCoClient(coClientAccountOptional.get());
 
           coClientAccountOptional.get().setCoClient(accountToUpdate);
+
+          if (coClientAccountOptional.get().getHousehold() != null) {
+            household = coClientAccountOptional.get().getHousehold();
+            accountToUpdate.setHousehold(coClientAccountOptional.get().getHousehold());
+          } else {
+            household = Household.builder()
+                .modifiedBy(principal.getName())
+                .name(
+                    accountToUpdate.getLastName()
+                        .equals(coClientAccountOptional.get().getLastName()) ?
+                        accountToUpdate.getLastName() + " Household" :
+                        accountToUpdate.getLastName() + "/" + coClientAccountOptional.get()
+                            .getLastName() + " Household")
+                .description(
+                    accountToUpdate.getLastName()
+                        .equals(coClientAccountOptional.get().getLastName()) ?
+                        accountToUpdate.getLastName() + " Household" :
+                        accountToUpdate.getLastName() + "/" + coClientAccountOptional.get()
+                            .getLastName() + " Household")
+                .householdAccounts(new HashSet<>(
+                    Arrays.asList(accountToUpdate, coClientAccountOptional.get())))
+                .primaryContact(accountToUpdate)
+                .build();
+
+            household = this.householdService.saveHousehold(household);
+
+            accountToUpdate.setHousehold(household);
+            coClientAccountOptional.get().setHousehold(household);
+          }
         }
       }
 
@@ -146,6 +183,24 @@ public class UpdateAccountDetailsEndpoint {
                   + "]  not found",
               HttpStatus.NOT_FOUND);
         }
+
+        if (household == null) {
+          Set<Account> householdAccounts = new HashSet<>(dependentAccounts);
+          householdAccounts.add(accountToUpdate);
+
+          household = Household.builder()
+              .name(accountToUpdate.getLastName() + " Household")
+              .description(accountToUpdate.getLastName() + " Household")
+              .householdAccounts(householdAccounts)
+              .primaryContact(accountToUpdate)
+              .build();
+
+          household = this.householdService.saveHousehold(household);
+        }
+
+        Household finalHousehold = household;
+        dependentAccounts.forEach(dependentAccount -> dependentAccount.setHousehold(
+            finalHousehold));
 
         accountToUpdate.setDependents(new HashSet<>(dependentAccounts));
       }
@@ -189,6 +244,7 @@ public class UpdateAccountDetailsEndpoint {
 
   private ResponseEntity<ErrorMessage> generateFailureResponse(String message, HttpStatus status) {
     log.warn(message);
+    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
     return new ResponseEntity<>(
         ErrorMessage.builder()
             .path(PATH)

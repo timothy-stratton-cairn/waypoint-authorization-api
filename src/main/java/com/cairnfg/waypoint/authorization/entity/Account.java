@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -31,7 +32,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Data
 @Entity
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true, exclude = {"coClient", "dependents"})
+@EqualsAndHashCode(callSuper = true, exclude = {"coClient", "dependents", "household"})
 @NoArgsConstructor
 @AllArgsConstructor
 @SQLRestriction("active=1")
@@ -46,6 +47,10 @@ public class Account extends BaseEntity implements IBaseEntity<Long>, UserDetail
   private String lastName;
   @Convert(converter = EncryptedFieldConverter.class)
   private String email;
+  @Convert(converter = EncryptedFieldConverter.class)
+  private String primaryPhoneNumber;
+  @Convert(converter = EncryptedFieldConverter.class)
+  private String secondaryPhoneNumber;
   @Convert(converter = EncryptedFieldConverter.class)
   private String address1;
   @Convert(converter = EncryptedFieldConverter.class)
@@ -87,6 +92,10 @@ public class Account extends BaseEntity implements IBaseEntity<Long>, UserDetail
       joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
   private Collection<Role> roles;
+
+  @JoinColumn(name = "household_id", nullable = false)
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+  private Household household;
 
   @Override
   @JsonIgnore

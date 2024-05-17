@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - preConditions:
+      onFail: HALT
+      onError: HALT
+  - changeSet:
+      id: add-household-table
+      author: tstratton
+      changes:
+        - sql:
+            dbms: 'h2, mysql'
+            sql: CREATE TABLE `household` (
+              `id` bigint NOT NULL AUTO_INCREMENT,
+              `created` DATETIME DEFAULT CURRENT_TIMESTAMP,
+              `updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              `modified_by` varchar(255) DEFAULT NULL,
+              `name` varchar(255) DEFAULT NULL,
+              `description` varchar(255) DEFAULT NULL,
+              `primary_contact_account_id` bigint NOT NULL,
+              `active` bit(1) DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              KEY `FK4pl4ktiq7hgfchxntsjyj4u24` (`primary_contact_account_id`),
+              CONSTRAINT `FK4pl4ktiq7hgfchxntsjyj4u875` FOREIGN KEY (`primary_contact_account_id`) REFERENCES `account` (`id`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  - changeSet:
+      id: add-phone-number-fields-to-account-table
+      author: tstratton
+      changes:
+        - sql:
+            dbms: 'h2, mysql'
+            sql: ALTER TABLE account
+              ADD COLUMN `primary_phone_number` varchar(36) DEFAULT NULL AFTER `email`,
+              ADD COLUMN `secondary_phone_number` varchar(36) DEFAULT NULL AFTER `primary_phone_number`,
+              ADD COLUMN `household_id` bigint DEFAULT NULL AFTER `zip`,
+              ADD CONSTRAINT `FK4pl4ktiq7hgfchxntsjy332v32` FOREIGN KEY (`household_id`) REFERENCES `household` (`id`);
+  - changeSet:
+      id: add-household-permissions
+      author: tstratton
+      changes:
+        - sql:
+            dbms: 'h2, mysql'
+            sql: INSERT INTO permission (created, updated, modified_by, name, description, active) VALUES
+              (NOW(), NOW(), 'liquibase', 'household.full', 'Can perform all operations related Households', 1);

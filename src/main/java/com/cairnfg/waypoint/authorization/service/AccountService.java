@@ -5,6 +5,7 @@ import com.cairnfg.waypoint.authorization.repository.AccountRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -37,11 +38,11 @@ public class AccountService implements UserDetailsService {
   }
 
   public List<Account> getAllAccounts() {
-    return this.accountRepository.findAll().stream().distinct().toList();
+    return this.accountRepository.findAll().stream().distinct().collect(Collectors.toList());
   }
 
   public List<Account> getAccountListsByIdList(List<Long> ids) {
-    return this.accountRepository.findAllById(ids).stream().distinct().toList();
+    return this.accountRepository.findAllById(ids).stream().distinct().collect(Collectors.toList());
   }
 
   public Account saveAccount(Account account) {
