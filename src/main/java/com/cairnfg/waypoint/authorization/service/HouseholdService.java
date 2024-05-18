@@ -30,4 +30,8 @@ public class HouseholdService {
   public Optional<Household> getHouseholdById(Long id) {
     return this.householdRepository.findById(id);
   }
+
+  public Optional<Household> getHouseholdByName(String name) {
+    return this.householdRepository.findByName(name);
+  }
 }

@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/2024-03-15-reset-permissions-to-agreed-upon-updates.yaml
   - include:
       file: db/changelog/2024-05-17-add-household-details-to-system.yaml
+  - include:
+      file: db/changelog/2024-05-18-add-protocol-status-and-protocol-comment-type-permissions-to-system.yaml

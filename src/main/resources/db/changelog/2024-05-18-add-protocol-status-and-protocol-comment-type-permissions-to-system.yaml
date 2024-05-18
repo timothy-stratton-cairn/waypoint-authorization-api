@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - preConditions:
+      onFail: HALT
+      onError: HALT
+  - changeSet:
+      id: add-new-permissions
+      author: tstratton
+      changes:
+        - sql:
+            dbms: 'h2, mysql'
+            sql: INSERT INTO permission (created, updated, modified_by, name, description, active) VALUES
+              (NOW(), NOW(), 'liquibase', 'protocol.status.full', 'Can perform all operations related Protocol Status', 1),
+              (NOW(), NOW(), 'liquibase', 'protocol.comment.type.full', 'Can perform all operations related Protocol Comment Types', 1);
