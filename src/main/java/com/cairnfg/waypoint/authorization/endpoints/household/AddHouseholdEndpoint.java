@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -55,6 +56,7 @@ public class AddHouseholdEndpoint {
     this.accountService = accountService;
   }
 
+  @Transactional
   @PostMapping(PATH)
   @SuppressWarnings("SimplifyStreamApiCallChains")
   @PreAuthorize("hasAnyAuthority('SCOPE_household.full', 'SCOPE_admin.full')")
@@ -127,9 +129,7 @@ public class AddHouseholdEndpoint {
     } else {
       try {
         if (householdDetailsDto.getName() != null &&
-            householdService.getHouseholdByName(householdDetailsDto.getName()).isPresent() &&
-            !householdService.getHouseholdByName(householdDetailsDto.getName()).get()
-                .getName().equals(householdDetailsDto.getName())) {
+            householdService.getHouseholdByName(householdDetailsDto.getName()).isPresent()) {
           return generateFailureResponse("Provided Household Name [" +
                   householdDetailsDto.getName() +
                   "] already exists",
@@ -138,10 +138,7 @@ public class AddHouseholdEndpoint {
       } catch (NoSuchElementException e) {
         if (householdDetailsDto.getName() != null &&
             householdService.getHouseholdByNameWithoutPrimaryContactPopulation(
-                householdDetailsDto.getName()).isPresent() &&
-            !householdService.getHouseholdByNameWithoutPrimaryContactPopulation(
-                    householdDetailsDto.getName()).get()
-                .getName().equals(householdDetailsDto.getName())) {
+                householdDetailsDto.getName()).isPresent()) {
           return generateFailureResponse("Provided Household Name [" +
                   householdDetailsDto.getName() +
                   "] already exists",
@@ -158,11 +155,10 @@ public class AddHouseholdEndpoint {
 
       Household createdHousehold = householdService.saveHousehold(householdToCreate);
 
-      Household finalCreatedHousehold = createdHousehold;
       householdAccounts.stream()
           .map(account -> {
             account.setModifiedBy(principal.getName());
-            account.setHousehold(finalCreatedHousehold);
+            account.setHousehold(createdHousehold);
             account.setIsPrimaryContactForHousehold(Boolean.FALSE);
             return account;
           })
@@ -172,7 +168,7 @@ public class AddHouseholdEndpoint {
       primaryAccounts.stream()
           .map(account -> {
             account.setModifiedBy(principal.getName());
-            account.setHousehold(finalCreatedHousehold);
+            account.setHousehold(createdHousehold);
             account.setIsPrimaryContactForHousehold(Boolean.TRUE);
             return account;
           })

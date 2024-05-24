@@ -17,3 +17,5 @@ databaseChangeLog:
       file: db/changelog/2024-05-18-add-protocol-status-and-protocol-comment-type-permissions-to-system.yaml
   - include:
       file: db/changelog/2024-05-23-update-primary-contact-paradigm-in-households.yaml
+  - include:
+      file: db/changelog/2024-05-24-unique-constraint-one-household-names-in-households.yaml

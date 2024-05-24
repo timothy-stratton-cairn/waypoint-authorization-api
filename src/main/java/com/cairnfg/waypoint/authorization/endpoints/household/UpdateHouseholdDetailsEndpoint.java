@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -45,6 +46,7 @@ public class UpdateHouseholdDetailsEndpoint {
     this.accountService = accountService;
   }
 
+  @Transactional
   @SuppressWarnings("SimplifyStreamApiCallChains")
   @PatchMapping(PATH)
   @PreAuthorize("hasAnyAuthority('SCOPE_household.full', 'SCOPE_admin.full')")
