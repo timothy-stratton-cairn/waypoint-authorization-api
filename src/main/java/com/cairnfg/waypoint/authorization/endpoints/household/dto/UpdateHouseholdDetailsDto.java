@@ -14,6 +14,6 @@ public class UpdateHouseholdDetailsDto {
 
   private String name;
   private String description;
-  private Long primaryContactAccountId;
+  private List<Long> primaryContactAccountIds;
   private List<Long> householdAccountIds;
 }

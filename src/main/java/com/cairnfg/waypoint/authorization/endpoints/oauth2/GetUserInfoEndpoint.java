@@ -3,6 +3,7 @@ package com.cairnfg.waypoint.authorization.endpoints.oauth2;
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
 import com.cairnfg.waypoint.authorization.endpoints.oauth2.dto.UserInfoDto;
 import com.cairnfg.waypoint.authorization.entity.Account;
+import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -66,7 +67,21 @@ public class GetUserInfoEndpoint {
   }
 
   private ResponseEntity<UserInfoDto> generateSuccessResponse(Account account) {
-    return ResponseEntity.ok(mapper.accountToUserInfoDto(account));
+    return ResponseEntity.ok(UserInfoDto.builder()
+        .accountId(account.getId())
+        .username(account.getUsername())
+        .firstName(account.getFirstName())
+        .lastName(account.getLastName())
+        .email(account.getEmail())
+        .roles(account.getRoles().stream()
+            .map(Role::getName)
+            .toList())
+        .householdId(account.getHousehold() != null ?
+            account.getHousehold().getId() : null)
+        .acceptedTC(account.getAcceptedTC())
+        .acceptedEULA(account.getAcceptedEULA())
+        .acceptedPA(account.getAcceptedPA())
+        .build());
   }
 
   private ResponseEntity<ErrorMessage> generateFailureResponse(String username) {

@@ -1,5 +1,6 @@
 package com.cairnfg.waypoint.authorization.endpoints.household.dto;
 
+import java.util.Set;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,5 +11,5 @@ public class HouseholdDto {
   private Long id;
   private String name;
   private Integer numOfAccountsInHousehold;
-  private Long primaryContactAccountId;
+  private Set<Long> primaryContactAccountIds;
 }

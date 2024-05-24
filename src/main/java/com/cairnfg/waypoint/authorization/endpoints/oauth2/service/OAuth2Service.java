@@ -93,7 +93,21 @@ public class OAuth2Service {
     return new JWTClaimsSet.Builder().issuer(this.authorizationServerSettings.getIssuer())
         .subject(account.getUsername()).audience(
             Collections.singletonList(account.getUsername())) //audience should be RegisteredClient
-        .claim("idInfo", IdTokenInfoDto.MAPPER.accountToIdTokenInfoDto(account))
+        .claim("idInfo", IdTokenInfoDto.builder()
+            .accountId(account.getId())
+            .username(account.getUsername())
+            .firstName(account.getFirstName())
+            .lastName(account.getLastName())
+            .email(account.getEmail())
+            .roles(account.getRoles().stream()
+                .map(Role::getName)
+                .toList())
+            .householdId(account.getHousehold() != null ?
+                account.getHousehold().getId() : null)
+            .acceptedTC(account.getAcceptedTC())
+            .acceptedEULA(account.getAcceptedEULA())
+            .acceptedPA(account.getAcceptedPA())
+            .build())
         .expirationTime(expirationTime)
         .notBeforeTime(Date.from(Instant.now())).issueTime(Date.from(Instant.now()))
         .jwtID(UUID.randomUUID().toString())

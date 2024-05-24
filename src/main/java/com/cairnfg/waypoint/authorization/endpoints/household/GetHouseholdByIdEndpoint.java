@@ -5,6 +5,7 @@ import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdAccou
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdAccountDetailsListDto;
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdDetailsDto;
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.PrimaryContactDetailsDto;
+import com.cairnfg.waypoint.authorization.endpoints.household.dto.PrimaryContactDetailsListDto;
 import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,12 +79,16 @@ public class GetHouseholdByIdEndpoint {
             .id(returnedHousehold.getId())
             .name(returnedHousehold.getName())
             .description(returnedHousehold.getDescription())
-            .primaryContact(PrimaryContactDetailsDto.builder()
-                .accountId(returnedHousehold.getPrimaryContact().getId())
-                .firstName(returnedHousehold.getPrimaryContact().getFirstName())
-                .lastName(returnedHousehold.getPrimaryContact().getLastName())
-                .phoneNumber(returnedHousehold.getPrimaryContact().getPrimaryPhoneNumber())
-                .email(returnedHousehold.getPrimaryContact().getEmail())
+            .primaryContacts(PrimaryContactDetailsListDto.builder()
+                .accounts(returnedHousehold.getPrimaryContacts().stream()
+                    .map(primaryContact -> PrimaryContactDetailsDto.builder()
+                        .accountId(primaryContact.getId())
+                        .firstName(primaryContact.getFirstName())
+                        .lastName(primaryContact.getLastName())
+                        .phoneNumber(primaryContact.getPrimaryPhoneNumber())
+                        .email(primaryContact.getEmail())
+                        .build())
+                    .collect(Collectors.toList()))
                 .build())
             .householdAccounts(HouseholdAccountDetailsListDto.builder()
                 .accounts(returnedHousehold.getHouseholdAccounts().stream()

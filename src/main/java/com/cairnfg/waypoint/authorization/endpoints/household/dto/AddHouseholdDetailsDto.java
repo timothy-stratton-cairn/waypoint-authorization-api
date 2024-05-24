@@ -18,9 +18,8 @@ public class AddHouseholdDetailsDto {
   @NotBlank(message = "Household Name is required")
   private String name;
   private String description;
-  @NotNull
-  @PositiveOrZero
-  private Long primaryContactAccountId;
-  @NotNull
-  private List<@PositiveOrZero Long> householdAccountIds;
+  @NotNull(message = "A Primary Account ID must be provided")
+  private List<@PositiveOrZero(message = "Account IDs cannot be negative") Long> primaryContactAccountIds;
+  @NotNull(message = "At least one Household Account ID (the primary account) must be provided")
+  private List<@PositiveOrZero(message = "Account IDs cannot be negative") Long> householdAccountIds;
 }

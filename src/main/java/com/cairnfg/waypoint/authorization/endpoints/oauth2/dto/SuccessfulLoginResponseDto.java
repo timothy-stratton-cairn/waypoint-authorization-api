@@ -9,9 +9,11 @@ import lombok.Data;
 public class SuccessfulLoginResponseDto {
 
   private Long accountId;
+  private Long householdId;
   private String accessToken;
   private String refreshToken;
   private String idToken;
   private Long expiresIn;
   private List<String> permissions;
+  private List<String> roles;
 }

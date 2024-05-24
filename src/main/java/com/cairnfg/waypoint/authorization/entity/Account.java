@@ -97,6 +97,8 @@ public class Account extends BaseEntity implements IBaseEntity<Long>, UserDetail
   @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
   private Household household;
 
+  private Boolean isPrimaryContactForHousehold;
+
   @Override
   @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities() {

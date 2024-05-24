@@ -6,6 +6,7 @@ import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdAccou
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdAccountDetailsListDto;
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdDetailsDto;
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.PrimaryContactDetailsDto;
+import com.cairnfg.waypoint.authorization.endpoints.household.dto.PrimaryContactDetailsListDto;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.service.AccountService;
@@ -23,8 +24,8 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -53,8 +54,9 @@ public class AddHouseholdEndpoint {
     this.householdService = householdService;
     this.accountService = accountService;
   }
+
   @PostMapping(PATH)
-  @SuppressWarnings("OptionalGetWithoutIsPresent")
+  @SuppressWarnings("SimplifyStreamApiCallChains")
   @PreAuthorize("hasAnyAuthority('SCOPE_household.full', 'SCOPE_admin.full')")
   @Operation(
       summary = "Creates a household with the provided details.",
@@ -84,8 +86,9 @@ public class AddHouseholdEndpoint {
     log.info("User [{}] is creating household with name [{}]", principal.getName(),
         householdDetailsDto.getName());
 
-    Optional<Account> primaryAccountOptional = householdDetailsDto.getPrimaryContactAccountId() == null ?
-        Optional.empty() : this.accountService.getAccountById(householdDetailsDto.getPrimaryContactAccountId());
+    List<Account> primaryAccounts = householdDetailsDto.getPrimaryContactAccountIds() == null ?
+        List.of() : this.accountService
+        .getAccountListsByIdList(householdDetailsDto.getPrimaryContactAccountIds());
     List<Account> householdAccounts = householdDetailsDto.getHouseholdAccountIds() == null ?
         List.of() : this.accountService
         .getAccountListsByIdList(householdDetailsDto.getHouseholdAccountIds());
@@ -97,52 +100,101 @@ public class AddHouseholdEndpoint {
       return generateFailureResponse(
           violations.stream().map(ConstraintViolation::getMessage).collect(
               Collectors.joining(", ")), HttpStatus.BAD_REQUEST);
-    } else if (householdDetailsDto.getPrimaryContactAccountId() != null && primaryAccountOptional.isEmpty()) {
-      return generateFailureResponse("Account with ID [" +
-              householdDetailsDto.getPrimaryContactAccountId() +
-              "]  provided for the primary account not found",
+    } else if (householdDetailsDto.getPrimaryContactAccountIds() != null &&
+        !householdDetailsDto.getPrimaryContactAccountIds().isEmpty()
+        && !new HashSet<>(primaryAccounts.stream()
+        .map(Account::getId)
+        .toList())
+        .containsAll(householdDetailsDto.getPrimaryContactAccountIds())) {
+      return generateFailureResponse("Provided Account with IDs [" +
+              householdDetailsDto.getPrimaryContactAccountIds().stream()
+                  .map(Objects::toString)
+                  .collect(Collectors.joining(",")) +
+              "] provided for the primary accounts of the household not found",
           HttpStatus.NOT_FOUND);
     } else if (householdDetailsDto.getHouseholdAccountIds() != null &&
         !householdDetailsDto.getHouseholdAccountIds().isEmpty()
         && !new HashSet<>(householdAccounts.stream()
-          .map(Account::getId)
-          .toList())
-          .containsAll(householdDetailsDto.getHouseholdAccountIds())) {
+        .map(Account::getId)
+        .toList())
+        .containsAll(householdDetailsDto.getHouseholdAccountIds())) {
       return generateFailureResponse("Provided Account with IDs [" +
               householdDetailsDto.getHouseholdAccountIds().stream()
                   .map(Objects::toString)
-                  .collect(Collectors.joining(","))+
+                  .collect(Collectors.joining(",")) +
               "]  provided for the household accounts not found",
           HttpStatus.NOT_FOUND);
-    } else if (householdDetailsDto.getName() != null &&
-        householdService.getHouseholdByName(householdDetailsDto.getName()).isPresent() &&
-        !householdService.getHouseholdByName(householdDetailsDto.getName()).get()
-            .getName().equals(householdDetailsDto.getName())) {
-      return generateFailureResponse("Provided Household Name [" +
-              householdDetailsDto.getName() +
-              "] already exists",
-          HttpStatus.CONFLICT);
     } else {
+      try {
+        if (householdDetailsDto.getName() != null &&
+            householdService.getHouseholdByName(householdDetailsDto.getName()).isPresent() &&
+            !householdService.getHouseholdByName(householdDetailsDto.getName()).get()
+                .getName().equals(householdDetailsDto.getName())) {
+          return generateFailureResponse("Provided Household Name [" +
+                  householdDetailsDto.getName() +
+                  "] already exists",
+              HttpStatus.CONFLICT);
+        }
+      } catch (NoSuchElementException e) {
+        if (householdDetailsDto.getName() != null &&
+            householdService.getHouseholdByNameWithoutPrimaryContactPopulation(
+                householdDetailsDto.getName()).isPresent() &&
+            !householdService.getHouseholdByNameWithoutPrimaryContactPopulation(
+                    householdDetailsDto.getName()).get()
+                .getName().equals(householdDetailsDto.getName())) {
+          return generateFailureResponse("Provided Household Name [" +
+                  householdDetailsDto.getName() +
+                  "] already exists",
+              HttpStatus.CONFLICT);
+        }
+      }
+
       Household householdToCreate = new Household();
 
+      householdToCreate.setModifiedBy(principal.getName());
       householdToCreate.setName(householdDetailsDto.getName());
       householdToCreate.setDescription(householdDetailsDto.getDescription());
-      householdToCreate.setPrimaryContact(primaryAccountOptional.get());
       householdToCreate.setHouseholdAccounts(new HashSet<>(householdAccounts));
 
       Household createdHousehold = householdService.saveHousehold(householdToCreate);
+
+      Household finalCreatedHousehold = createdHousehold;
+      householdAccounts.stream()
+          .map(account -> {
+            account.setModifiedBy(principal.getName());
+            account.setHousehold(finalCreatedHousehold);
+            account.setIsPrimaryContactForHousehold(Boolean.FALSE);
+            return account;
+          })
+          .forEach(accountService::saveAccount);
+      //###### DO NOT PUT THIS BEFORE THE ABOVE OPERATION FOR `householdAccounts` ######
+      //###### IT WILL BREAK THE PRIMARY ACCOUNT FLOW ######
+      primaryAccounts.stream()
+          .map(account -> {
+            account.setModifiedBy(principal.getName());
+            account.setHousehold(finalCreatedHousehold);
+            account.setIsPrimaryContactForHousehold(Boolean.TRUE);
+            return account;
+          })
+          .forEach(accountService::saveAccount);
+
+      createdHousehold.setPrimaryContacts(new HashSet<>(primaryAccounts));
 
       return ResponseEntity.status(HttpStatus.CREATED)
           .body(HouseholdDetailsDto.builder()
               .id(createdHousehold.getId())
               .name(createdHousehold.getName())
               .description(createdHousehold.getDescription())
-              .primaryContact(PrimaryContactDetailsDto.builder()
-                  .accountId(createdHousehold.getPrimaryContact().getId())
-                  .firstName(createdHousehold.getPrimaryContact().getFirstName())
-                  .lastName(createdHousehold.getPrimaryContact().getLastName())
-                  .phoneNumber(createdHousehold.getPrimaryContact().getPrimaryPhoneNumber())
-                  .email(createdHousehold.getPrimaryContact().getEmail())
+              .primaryContacts(PrimaryContactDetailsListDto.builder()
+                  .accounts(createdHousehold.getPrimaryContacts().stream()
+                      .map(primaryContact -> PrimaryContactDetailsDto.builder()
+                          .accountId(primaryContact.getId())
+                          .firstName(primaryContact.getFirstName())
+                          .lastName(primaryContact.getLastName())
+                          .phoneNumber(primaryContact.getPrimaryPhoneNumber())
+                          .email(primaryContact.getEmail())
+                          .build())
+                      .collect(Collectors.toList()))
                   .build())
               .householdAccounts(HouseholdAccountDetailsListDto.builder()
                   .accounts(createdHousehold.getHouseholdAccounts().stream()

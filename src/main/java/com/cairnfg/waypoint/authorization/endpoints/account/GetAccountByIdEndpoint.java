@@ -87,6 +87,8 @@ public class GetAccountByIdEndpoint {
             .dependents(returnedAccount.getDependents().stream()
                 .map(AccountMapper.INSTANCE::accountToLinkedAccountDetailsDto)
                 .collect(Collectors.toSet()))
+            .householdId(returnedAccount.getHousehold() != null ?
+                returnedAccount.getHousehold().getId() : null)
             .build()
     );
   }

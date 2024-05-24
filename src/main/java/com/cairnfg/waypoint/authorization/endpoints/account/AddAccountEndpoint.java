@@ -120,7 +120,7 @@ public class AddAccountEndpoint {
       }
 
       Account createdAccount = createAccount(accountDetailsDto, principal.getName(), roles);
-      Household household = null;
+      Household household;
       Optional<Account> coClientAccountOptional;
 
       if (accountDetailsDto.getCoClientId() != null) {
@@ -134,35 +134,42 @@ public class AddAccountEndpoint {
           createdAccount.setCoClient(coClientAccountOptional.get());
 
           coClientAccountOptional.get().setCoClient(createdAccount);
+        }
+      }
 
-          if (coClientAccountOptional.get().getHousehold() != null) {
-            household = coClientAccountOptional.get().getHousehold();
-            createdAccount.setHousehold(coClientAccountOptional.get().getHousehold());
-          } else {
-            household = Household.builder()
-                .modifiedBy(principal.getName())
-                .name(
-                    createdAccount.getLastName().equals(coClientAccountOptional.get().getLastName())
-                        ?
-                        createdAccount.getLastName() + " Household" :
-                        createdAccount.getLastName() + "/" + coClientAccountOptional.get()
-                            .getLastName() + " Household")
-                .description(
-                    createdAccount.getLastName().equals(coClientAccountOptional.get().getLastName())
-                        ?
-                        createdAccount.getLastName() + " Household" :
-                        createdAccount.getLastName() + "/" + coClientAccountOptional.get()
-                            .getLastName() + " Household")
-                .householdAccounts(new HashSet<>(
-                    Arrays.asList(createdAccount, coClientAccountOptional.get())))
-                .primaryContact(createdAccount)
-                .build();
+      if (createdAccount.getCoClient() != null &&
+          createdAccount.getCoClient().getHousehold() != null) {
+        household = createdAccount.getCoClient().getHousehold();
+        createdAccount.setHousehold(createdAccount.getCoClient().getHousehold());
 
-            household = this.householdService.saveHousehold(household);
+        createdAccount.setIsPrimaryContactForHousehold(Boolean.TRUE);
+      } else {
+        household = Household.builder()
+            .modifiedBy(principal.getName())
+            .name(createdAccount.getCoClient() != null ?
+                createdAccount.getLastName().equals(createdAccount.getCoClient().getLastName()) ?
+                    createdAccount.getLastName() + " Household" :
+                    createdAccount.getLastName() + "/" + createdAccount.getCoClient().getLastName()
+                        + " Household" :
+                createdAccount.getLastName() + " Household")
+            .description(createdAccount.getCoClient() != null ?
+                createdAccount.getLastName().equals(createdAccount.getCoClient().getLastName()) ?
+                    createdAccount.getLastName() + " Household" :
+                    createdAccount.getLastName() + "/" + createdAccount.getCoClient().getLastName()
+                        + " Household" :
+                createdAccount.getLastName() + " Household")
+            .householdAccounts(createdAccount.getCoClient() != null ?
+                new HashSet<>(Arrays.asList(createdAccount, createdAccount.getCoClient())) :
+                new HashSet<>(Arrays.asList(createdAccount)))
+            .build();
 
-            createdAccount.setHousehold(household);
-            coClientAccountOptional.get().setHousehold(household);
-          }
+        household = this.householdService.saveHousehold(household);
+
+        createdAccount.setHousehold(household);
+        createdAccount.setIsPrimaryContactForHousehold(Boolean.TRUE);
+        if (createdAccount.getCoClient() != null) {
+          createdAccount.getCoClient().setHousehold(household);
+          createdAccount.getCoClient().setIsPrimaryContactForHousehold(Boolean.TRUE);
         }
       }
 
@@ -181,20 +188,6 @@ public class AddAccountEndpoint {
                   .collect(Collectors.joining(","))
                   + "]  not found",
               HttpStatus.NOT_FOUND);
-        }
-
-        if (household == null) {
-          Set<Account> householdAccounts = new HashSet<>(dependentAccounts);
-          householdAccounts.add(createdAccount);
-
-          household = Household.builder()
-              .name(createdAccount.getLastName() + " Household")
-              .description(createdAccount.getLastName() + " Household")
-              .householdAccounts(householdAccounts)
-              .primaryContact(createdAccount)
-              .build();
-
-          household = this.householdService.saveHousehold(household);
         }
 
         Household finalHousehold = household;
@@ -225,6 +218,7 @@ public class AddAccountEndpoint {
                   .dependents(createdAccount.getDependents().stream()
                       .map(AccountMapper.INSTANCE::accountToLinkedAccountDetailsDto)
                       .collect(Collectors.toSet()))
+                  .householdId(household.getId())
                   .build());
     }
   }

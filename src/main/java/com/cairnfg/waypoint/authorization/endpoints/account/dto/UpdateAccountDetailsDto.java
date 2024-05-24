@@ -27,4 +27,5 @@ public class UpdateAccountDetailsDto {
 
   private Long coClientId;
   private Set<Long> dependentIds;
+  private Boolean isPrimaryHouseholdContact;
 }

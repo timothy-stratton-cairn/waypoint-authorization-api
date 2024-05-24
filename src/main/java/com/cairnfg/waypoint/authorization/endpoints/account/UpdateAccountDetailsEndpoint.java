@@ -136,36 +136,43 @@ public class UpdateAccountDetailsEndpoint {
           accountToUpdate.setCoClient(coClientAccountOptional.get());
 
           coClientAccountOptional.get().setCoClient(accountToUpdate);
-
-          if (coClientAccountOptional.get().getHousehold() != null) {
-            household = coClientAccountOptional.get().getHousehold();
-            accountToUpdate.setHousehold(coClientAccountOptional.get().getHousehold());
-          } else {
-            household = Household.builder()
-                .modifiedBy(principal.getName())
-                .name(
-                    accountToUpdate.getLastName()
-                        .equals(coClientAccountOptional.get().getLastName()) ?
-                        accountToUpdate.getLastName() + " Household" :
-                        accountToUpdate.getLastName() + "/" + coClientAccountOptional.get()
-                            .getLastName() + " Household")
-                .description(
-                    accountToUpdate.getLastName()
-                        .equals(coClientAccountOptional.get().getLastName()) ?
-                        accountToUpdate.getLastName() + " Household" :
-                        accountToUpdate.getLastName() + "/" + coClientAccountOptional.get()
-                            .getLastName() + " Household")
-                .householdAccounts(new HashSet<>(
-                    Arrays.asList(accountToUpdate, coClientAccountOptional.get())))
-                .primaryContact(accountToUpdate)
-                .build();
-
-            household = this.householdService.saveHousehold(household);
-
-            accountToUpdate.setHousehold(household);
-            coClientAccountOptional.get().setHousehold(household);
-          }
         }
+      }
+
+      if (household == null && accountToUpdate.getCoClient() != null &&
+          accountToUpdate.getCoClient().getHousehold() != null) {
+        household = accountToUpdate.getCoClient().getHousehold();
+        accountToUpdate.setHousehold(accountToUpdate.getCoClient().getHousehold());
+
+        accountToUpdate.setIsPrimaryContactForHousehold(Boolean.TRUE);
+      } else if (household == null) {
+        household = Household.builder()
+            .modifiedBy(principal.getName())
+            .name(accountToUpdate.getCoClient() != null ?
+                accountToUpdate.getLastName().equals(accountToUpdate.getCoClient().getLastName()) ?
+                    accountToUpdate.getLastName() + " Household" :
+                    accountToUpdate.getLastName() + "/" + accountToUpdate.getCoClient()
+                        .getLastName() + " Household" :
+                accountToUpdate.getLastName() + " Household")
+            .description(accountToUpdate.getCoClient() != null ?
+                accountToUpdate.getLastName().equals(accountToUpdate.getCoClient().getLastName()) ?
+                    accountToUpdate.getLastName() + " Household" :
+                    accountToUpdate.getLastName() + "/" + accountToUpdate.getCoClient()
+                        .getLastName() + " Household" :
+                accountToUpdate.getLastName() + " Household")
+            .householdAccounts(accountToUpdate.getCoClient() != null ?
+                new HashSet<>(Arrays.asList(accountToUpdate, accountToUpdate.getCoClient())) :
+                new HashSet<>(Arrays.asList(accountToUpdate)))
+            .build();
+
+        household = this.householdService.saveHousehold(household);
+      }
+
+      accountToUpdate.setHousehold(household);
+      accountToUpdate.setIsPrimaryContactForHousehold(
+          accountDetailsDto.getIsPrimaryHouseholdContact());
+      if (accountToUpdate.getCoClient() != null) {
+        accountToUpdate.getCoClient().setHousehold(household);
       }
 
       if (accountDetailsDto.getDependentIds() != null) {
@@ -192,7 +199,6 @@ public class UpdateAccountDetailsEndpoint {
               .name(accountToUpdate.getLastName() + " Household")
               .description(accountToUpdate.getLastName() + " Household")
               .householdAccounts(householdAccounts)
-              .primaryContact(accountToUpdate)
               .build();
 
           household = this.householdService.saveHousehold(household);

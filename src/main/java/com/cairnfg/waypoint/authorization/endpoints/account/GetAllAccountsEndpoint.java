@@ -1,7 +1,9 @@
 package com.cairnfg.waypoint.authorization.endpoints.account;
 
+import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountListDto;
-import com.cairnfg.waypoint.authorization.endpoints.account.mapper.AccountMapper;
+import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountRolesListDto;
+import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -66,7 +68,16 @@ public class GetAllAccountsEndpoint {
         AccountListDto.builder()
             .accounts(
                 this.accountService.getAccountListsByIdList(List.of(accountIds)).stream()
-                    .map(AccountMapper.INSTANCE::toDto)
+                    .map(account -> AccountDto.builder()
+                        .id(account.getId())
+                        .firstName(account.getFirstName())
+                        .lastName(account.getLastName())
+                        .accountRoles(AccountRolesListDto.builder()
+                            .roles(account.getRoles().stream()
+                                .map(Role::getName)
+                                .toList())
+                            .build())
+                        .build())
                     .toList())
             .build()
     );
@@ -78,7 +89,16 @@ public class GetAllAccountsEndpoint {
         AccountListDto.builder()
             .accounts(
                 this.accountService.getAllAccounts().stream()
-                    .map(AccountMapper.INSTANCE::toDto)
+                    .map(account -> AccountDto.builder()
+                        .id(account.getId())
+                        .firstName(account.getFirstName())
+                        .lastName(account.getLastName())
+                        .accountRoles(AccountRolesListDto.builder()
+                            .roles(account.getRoles().stream()
+                                .map(Role::getName)
+                                .toList())
+                            .build())
+                        .build())
                     .toList())
             .build()
     );

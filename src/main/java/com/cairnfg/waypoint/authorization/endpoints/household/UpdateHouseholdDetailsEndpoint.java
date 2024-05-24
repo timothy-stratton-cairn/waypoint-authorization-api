@@ -44,6 +44,8 @@ public class UpdateHouseholdDetailsEndpoint {
     this.householdService = householdService;
     this.accountService = accountService;
   }
+
+  @SuppressWarnings("SimplifyStreamApiCallChains")
   @PatchMapping(PATH)
   @PreAuthorize("hasAnyAuthority('SCOPE_household.full', 'SCOPE_admin.full')")
   @Operation(
@@ -69,32 +71,42 @@ public class UpdateHouseholdDetailsEndpoint {
                   schema = @Schema(implementation = ErrorMessage.class))})})
   public ResponseEntity<?> updateHouseholdById(@PathVariable Long householdId,
       @RequestBody UpdateHouseholdDetailsDto householdDetailsDto, Principal principal) {
-    log.info("User [{}] is updating household detail with ID [{}]", principal.getName(), householdId);
+    log.info("User [{}] is updating household detail with ID [{}]", principal.getName(),
+        householdId);
 
-    Optional<Household> householdToUpdateOptional = this.householdService.getHouseholdById(householdId);
-    Optional<Account> primaryAccountOptional = householdDetailsDto.getPrimaryContactAccountId() == null ?
-        Optional.empty() : this.accountService.getAccountById(householdDetailsDto.getPrimaryContactAccountId());
+    Optional<Household> householdToUpdateOptional = this.householdService.getHouseholdById(
+        householdId);
+    List<Account> primaryAccounts = householdDetailsDto.getPrimaryContactAccountIds() == null ?
+        List.of() : this.accountService
+        .getAccountListsByIdList(householdDetailsDto.getPrimaryContactAccountIds());
     List<Account> householdAccounts = householdDetailsDto.getHouseholdAccountIds() == null ?
         List.of() : this.accountService
         .getAccountListsByIdList(householdDetailsDto.getHouseholdAccountIds());
     if (householdToUpdateOptional.isEmpty()) {
       return generateFailureResponse("Household with ID [" + householdId + "] not found",
           HttpStatus.NOT_FOUND);
-    } else if (householdDetailsDto.getPrimaryContactAccountId() != null && primaryAccountOptional.isEmpty()) {
-      return generateFailureResponse("Account with ID [" +
-              householdDetailsDto.getPrimaryContactAccountId() +
-              "]  provided for the primary account not found",
+    } else if (householdDetailsDto.getPrimaryContactAccountIds() != null &&
+        !householdDetailsDto.getPrimaryContactAccountIds().isEmpty()
+        && !new HashSet<>(primaryAccounts.stream()
+        .map(Account::getId)
+        .toList())
+        .containsAll(householdDetailsDto.getPrimaryContactAccountIds())) {
+      return generateFailureResponse("Provided Account with IDs [" +
+              householdDetailsDto.getPrimaryContactAccountIds().stream()
+                  .map(Objects::toString)
+                  .collect(Collectors.joining(",")) +
+              "] provided for the primary accounts of the household not found",
           HttpStatus.NOT_FOUND);
     } else if (householdDetailsDto.getHouseholdAccountIds() != null &&
         !householdDetailsDto.getHouseholdAccountIds().isEmpty()
         && !new HashSet<>(householdAccounts.stream()
-          .map(Account::getId)
-          .toList())
-          .containsAll(householdDetailsDto.getHouseholdAccountIds())) {
+        .map(Account::getId)
+        .toList())
+        .containsAll(householdDetailsDto.getHouseholdAccountIds())) {
       return generateFailureResponse("Provided Account with IDs [" +
               householdDetailsDto.getHouseholdAccountIds().stream()
                   .map(Objects::toString)
-                  .collect(Collectors.joining(","))+
+                  .collect(Collectors.joining(",")) +
               "]  provided for the household accounts not found",
           HttpStatus.NOT_FOUND);
     } else if (householdDetailsDto.getName() != null &&
@@ -116,9 +128,25 @@ public class UpdateHouseholdDetailsEndpoint {
         householdToUpdate.setDescription(householdDetailsDto.getDescription());
       }
 
-      if (householdDetailsDto.getPrimaryContactAccountId() != null &&
-          primaryAccountOptional.isPresent()) {
-        householdToUpdate.setPrimaryContact(primaryAccountOptional.get());
+      if (householdDetailsDto.getPrimaryContactAccountIds() != null) {
+        List<Account> accountsNoLongerPrimaryContactOfHousehold = householdToUpdate.getPrimaryContacts()
+            .stream()
+            .map(account -> {
+              account.setModifiedBy(principal.getName());
+              account.setIsPrimaryContactForHousehold(Boolean.FALSE);
+              return account;
+            })
+            .collect(Collectors.toList());
+        accountsNoLongerPrimaryContactOfHousehold.forEach(accountService::saveAccount);
+
+        List<Account> newPrimaryAccount = primaryAccounts.stream()
+            .map(account -> {
+              account.setModifiedBy(principal.getName());
+              account.setIsPrimaryContactForHousehold(Boolean.TRUE);
+              return account;
+            })
+            .collect(Collectors.toList());
+        newPrimaryAccount.forEach(accountService::saveAccount);
       }
 
       if (householdDetailsDto.getHouseholdAccountIds() != null &&

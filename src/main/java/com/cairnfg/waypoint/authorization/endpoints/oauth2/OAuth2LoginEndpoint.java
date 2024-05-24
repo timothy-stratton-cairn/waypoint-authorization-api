@@ -5,6 +5,7 @@ import com.cairnfg.waypoint.authorization.endpoints.oauth2.dto.SuccessfulLoginRe
 import com.cairnfg.waypoint.authorization.endpoints.oauth2.service.OAuth2Service;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Authorization;
+import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
 import com.nimbusds.jose.JOSEException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,6 +92,11 @@ public class OAuth2LoginEndpoint {
         .permissions(authorization.getAccount()
             .getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
+            .toList())
+        .householdId(authorization.getAccount().getHousehold() != null ?
+            authorization.getAccount().getHousehold().getId() : null)
+        .roles(authorization.getAccount().getRoles().stream()
+            .map(Role::getName)
             .toList())
         .build();
 

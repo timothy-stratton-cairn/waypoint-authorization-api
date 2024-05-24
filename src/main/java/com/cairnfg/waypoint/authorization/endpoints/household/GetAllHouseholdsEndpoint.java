@@ -2,6 +2,7 @@ package com.cairnfg.waypoint.authorization.endpoints.household;
 
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdDto;
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdListDto;
+import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -52,7 +54,9 @@ public class GetAllHouseholdsEndpoint {
                     .map(household -> HouseholdDto.builder()
                         .id(household.getId())
                         .name(household.getName())
-                        .primaryContactAccountId(household.getPrimaryContact().getId())
+                        .primaryContactAccountIds(household.getPrimaryContacts().stream()
+                            .map(Account::getId)
+                            .collect(Collectors.toSet()))
                         .numOfAccountsInHousehold(household.getHouseholdAccounts().size())
                         .build())
                     .toList())

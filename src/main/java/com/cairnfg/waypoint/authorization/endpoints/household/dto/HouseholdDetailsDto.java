@@ -10,6 +10,6 @@ public class HouseholdDetailsDto {
   private Long id;
   private String name;
   private String description;
-  private PrimaryContactDetailsDto primaryContact;
+  private PrimaryContactDetailsListDto primaryContacts;
   private HouseholdAccountDetailsListDto householdAccounts;
 }
