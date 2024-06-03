@@ -9,8 +9,10 @@ import com.cairnfg.waypoint.authorization.endpoints.account.dto.BatchAddAccountD
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.BatchAddAccountsResponseDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.mapper.AccountMapper;
 import com.cairnfg.waypoint.authorization.entity.Account;
+import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
+import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import com.cairnfg.waypoint.authorization.service.RoleService;
 import com.cairnfg.waypoint.authorization.utility.PasswordUtility;
 import com.github.javafaker.Faker;
@@ -25,6 +27,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,10 +50,13 @@ public class BatchAddAccountsEndpoint {
   private final RoleService roleService;
 
   private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+  private final HouseholdService householdService;
 
-  public BatchAddAccountsEndpoint(AccountService accountService, RoleService roleService) {
+  public BatchAddAccountsEndpoint(AccountService accountService, RoleService roleService,
+      HouseholdService householdService) {
     this.accountService = accountService;
     this.roleService = roleService;
+    this.householdService = householdService;
   }
 
   @PostMapping(PATH)
@@ -74,6 +81,7 @@ public class BatchAddAccountsEndpoint {
   public ResponseEntity<BatchAddAccountsResponseDto> addAccount(
       @RequestBody BatchAddAccountDetailsListDto batchAddAccountDetailsListDto,
       Principal principal) {
+    //TODO Create households from the batched accounts
     log.info("User [{}] is attempting to create [{}] account with usernames [{}}",
         principal.getName(),
         batchAddAccountDetailsListDto.getNumOfAccounts(),
@@ -90,7 +98,7 @@ public class BatchAddAccountsEndpoint {
     for (BatchAddAccountDetailsDto addAccountResponseDto : batchAddAccountDetailsListDto.getAccountBatch()) {
       this.accountService.findByUsername(addAccountResponseDto.getUsername())
           .ifPresentOrElse(
-              account -> setupAccountAssociation(addAccountResponseDto, account),
+              account -> setupAccountAssociation(addAccountResponseDto, account, principal.getName()),
               () -> log.debug("Nothing to be done for uncreated account [{}]",
                   addAccountResponseDto.getUsername()));
     }
@@ -99,14 +107,19 @@ public class BatchAddAccountsEndpoint {
   }
 
   private void setupAccountAssociation(BatchAddAccountDetailsDto addAccountResponseDto,
-      Account account) {
+      Account account, String modifiedBy) {
     Optional<Account> relatedAccount;
+    Household household = null;
+
     if ((relatedAccount = this.accountService.findByUsername(
         addAccountResponseDto.getCoClientUsername())).isPresent()) {
       account.setCoClient(relatedAccount.get());
+      relatedAccount.get().setCoClient(account);
       this.accountService.saveAccount(account);
+      this.accountService.saveAccount(relatedAccount.get());
     } else if ((relatedAccount = this.accountService.findByUsername(
         addAccountResponseDto.getParentAccountUsername())).isPresent()) {
+
       relatedAccount.get().getDependents().add(account);
       this.accountService.saveAccount(relatedAccount.get());
     }
@@ -164,6 +177,7 @@ public class BatchAddAccountsEndpoint {
 
     return AddAccountResponseDto.builder()
         .accountId(createdAccount.getId())
+        .householdId(createdAccount.getHousehold().getId())
         .username(createdAccount.getUsername())
         .error(Boolean.FALSE)
         .message("201 - Account created successfully")

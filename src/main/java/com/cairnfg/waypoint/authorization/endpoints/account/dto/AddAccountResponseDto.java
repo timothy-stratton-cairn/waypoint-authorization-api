@@ -11,6 +11,7 @@ import lombok.Data;
 public class AddAccountResponseDto {
 
   private Long accountId;
+  private Long householdId;
   private String username;
   private Boolean error;
   private String message;

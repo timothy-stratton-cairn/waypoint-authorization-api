@@ -60,7 +60,7 @@ public class Account extends BaseEntity implements IBaseEntity<Long>, UserDetail
   @Convert(converter = EncryptedFieldConverter.class)
   private String zip;
 
-  @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+  @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
   @JoinTable(name = "account_relationship",
       joinColumns = @JoinColumn(name = "main_account_id", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "co_client_id", referencedColumnName = "id"))
