@@ -27,8 +27,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.security.Principal;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -98,7 +96,8 @@ public class BatchAddAccountsEndpoint {
     for (BatchAddAccountDetailsDto addAccountResponseDto : batchAddAccountDetailsListDto.getAccountBatch()) {
       this.accountService.findByUsername(addAccountResponseDto.getUsername())
           .ifPresentOrElse(
-              account -> setupAccountAssociation(addAccountResponseDto, account, principal.getName()),
+              account -> setupAccountAssociation(addAccountResponseDto, account,
+                  principal.getName()),
               () -> log.debug("Nothing to be done for uncreated account [{}]",
                   addAccountResponseDto.getUsername()));
     }
