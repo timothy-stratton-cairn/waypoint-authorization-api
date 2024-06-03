@@ -9,10 +9,8 @@ import com.cairnfg.waypoint.authorization.endpoints.account.dto.BatchAddAccountD
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.BatchAddAccountsResponseDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.mapper.AccountMapper;
 import com.cairnfg.waypoint.authorization.entity.Account;
-import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
-import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import com.cairnfg.waypoint.authorization.service.RoleService;
 import com.cairnfg.waypoint.authorization.utility.PasswordUtility;
 import com.github.javafaker.Faker;
@@ -48,13 +46,10 @@ public class BatchAddAccountsEndpoint {
   private final RoleService roleService;
 
   private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-  private final HouseholdService householdService;
 
-  public BatchAddAccountsEndpoint(AccountService accountService, RoleService roleService,
-      HouseholdService householdService) {
+  public BatchAddAccountsEndpoint(AccountService accountService, RoleService roleService) {
     this.accountService = accountService;
     this.roleService = roleService;
-    this.householdService = householdService;
   }
 
   @PostMapping(PATH)
@@ -96,8 +91,7 @@ public class BatchAddAccountsEndpoint {
     for (BatchAddAccountDetailsDto addAccountResponseDto : batchAddAccountDetailsListDto.getAccountBatch()) {
       this.accountService.findByUsername(addAccountResponseDto.getUsername())
           .ifPresentOrElse(
-              account -> setupAccountAssociation(addAccountResponseDto, account,
-                  principal.getName()),
+              account -> setupAccountAssociation(addAccountResponseDto, account),
               () -> log.debug("Nothing to be done for uncreated account [{}]",
                   addAccountResponseDto.getUsername()));
     }
@@ -106,9 +100,8 @@ public class BatchAddAccountsEndpoint {
   }
 
   private void setupAccountAssociation(BatchAddAccountDetailsDto addAccountResponseDto,
-      Account account, String modifiedBy) {
+      Account account) {
     Optional<Account> relatedAccount;
-    Household household = null;
 
     if ((relatedAccount = this.accountService.findByUsername(
         addAccountResponseDto.getCoClientUsername())).isPresent()) {
