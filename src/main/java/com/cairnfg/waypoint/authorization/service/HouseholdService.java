@@ -26,7 +26,8 @@ public class HouseholdService {
   }
 
   public List<Household> getHouseholdListsByIdList(List<Long> ids) {
-    return this.householdRepository.findAllById(ids).stream().distinct().collect(Collectors.toList());
+    return this.householdRepository.findAllById(ids).stream().distinct()
+        .collect(Collectors.toList());
   }
 
   public Household saveHousehold(Household household) {

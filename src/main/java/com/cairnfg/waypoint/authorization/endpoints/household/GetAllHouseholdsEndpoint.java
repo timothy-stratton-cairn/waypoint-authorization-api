@@ -119,7 +119,8 @@ public class GetAllHouseholdsEndpoint {
   private HouseholdRoleEnum getHouseholdRole(Household household, Account account) {
     if (household.getPrimaryContacts().contains(account)) {
       return HouseholdRoleEnum.PRIMARY_CONTACT;
-    } else if (account.getCoClient() != null || account.getDependents() == null || account.getDependents().isEmpty()) {
+    } else if (account.getCoClient() != null || account.getDependents() == null
+        || account.getDependents().isEmpty()) {
       return HouseholdRoleEnum.CO_CLIENT;
     } else {
       return HouseholdRoleEnum.DEPENDENT;

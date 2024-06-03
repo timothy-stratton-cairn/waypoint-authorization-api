@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class HouseholdAccountListDto {
+
   private List<HouseholdAccountDto> accounts;
   private Integer numberOfAccounts;
 

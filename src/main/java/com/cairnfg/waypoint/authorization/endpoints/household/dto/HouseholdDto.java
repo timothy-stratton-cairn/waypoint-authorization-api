@@ -1,6 +1,5 @@
 package com.cairnfg.waypoint.authorization.endpoints.household.dto;
 
-import java.util.Set;
 import lombok.Builder;
 import lombok.Data;
 
