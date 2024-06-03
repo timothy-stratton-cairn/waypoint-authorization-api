@@ -94,13 +94,13 @@ public class GetAccountByIdEndpoint {
   }
 
   public ResponseEntity<ErrorMessage> generateFailureResponse(Long protocolTemplateId) {
-    log.info("Protocol Template with ID [{}] not found", protocolTemplateId);
+    log.info("User Account with ID [{}] not found", protocolTemplateId);
     return new ResponseEntity<>(
         ErrorMessage.builder()
             .path(PATH)
             .timestamp(LocalDateTime.now())
             .status(HttpStatus.NOT_FOUND.value())
-            .error("Protocol Template with ID [" + protocolTemplateId + "] not found")
+            .error("User Account with ID [" + protocolTemplateId + "] not found")
             .build(),
         HttpStatus.NOT_FOUND
     );

@@ -25,6 +25,10 @@ public class HouseholdService {
         .map(this::getPrimaryContactsForHousehold).collect(Collectors.toList());
   }
 
+  public List<Household> getHouseholdListsByIdList(List<Long> ids) {
+    return this.householdRepository.findAllById(ids).stream().distinct().collect(Collectors.toList());
+  }
+
   public Household saveHousehold(Household household) {
     return getPrimaryContactsForHousehold(this.householdRepository.save(household));
   }

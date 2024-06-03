@@ -167,7 +167,11 @@ public class WaypointAuthorizationApiApp {
         .dependent(dependentAccount)
         .build();
 
-    accountRelationshipRepository.saveAll(List.of(coClientRelationship, dependencyRelationship));
+    try {
+      accountRelationshipRepository.saveAll(List.of(coClientRelationship, dependencyRelationship));
+    } catch (Exception e) {
+      //nothing to be done
+    }
 
     RegisteredClient oidcClient = RegisteredClient.builder()
         .clientId("oidc-client")

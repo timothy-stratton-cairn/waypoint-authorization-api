@@ -10,6 +10,5 @@ public class HouseholdDto {
 
   private Long id;
   private String name;
-  private Integer numOfAccountsInHousehold;
-  private Set<Long> primaryContactAccountIds;
+  private HouseholdAccountListDto householdAccounts;
 }
