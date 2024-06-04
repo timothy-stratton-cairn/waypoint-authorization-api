@@ -26,7 +26,8 @@ public class HouseholdService {
   }
 
   public List<Household> getHouseholdListsByIdList(List<Long> ids) {
-    return this.householdRepository.findAllById(ids).stream().distinct()
+    return this.householdRepository.findAllById(ids).stream()
+        .map(this::getPrimaryContactsForHousehold).distinct()
         .collect(Collectors.toList());
   }
 
