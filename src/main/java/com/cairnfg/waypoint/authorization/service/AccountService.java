@@ -1,26 +1,41 @@
 package com.cairnfg.waypoint.authorization.service;
 
+import com.cairnfg.waypoint.authorization.dto.LinksDto;
+import com.cairnfg.waypoint.authorization.dto.MailRequestQueueDto;
+import com.cairnfg.waypoint.authorization.dto.enumeration.MailRequestEnum;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.repository.AccountRepository;
+import com.cairnfg.waypoint.authorization.utility.PasswordUtility;
+import com.cairnfg.waypoint.authorization.utility.sqs.SqsUtility;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class AccountService implements UserDetailsService {
 
   private final AccountRepository accountRepository;
   private final PasswordEncoder passwordEncoder;
+  private final SqsUtility sqsUtility;
 
-  public AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
+  @Value("${waypoint.authorization.reset-password.link}")
+  private String passwordResetLink;
+
+  public AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder,
+      SqsUtility sqsUtility) {
     this.accountRepository = accountRepository;
     this.passwordEncoder = passwordEncoder;
+    this.sqsUtility = sqsUtility;
   }
 
   @Override
@@ -31,6 +46,10 @@ public class AccountService implements UserDetailsService {
 
   public Optional<Account> findByUsername(String username) {
     return this.accountRepository.findByUsername(username);
+  }
+
+  public Optional<Account> findByEmail(String email) {
+    return this.accountRepository.findByEmail(email);
   }
 
   public Optional<Account> getAccountById(Long accountId) {
@@ -63,5 +82,25 @@ public class AccountService implements UserDetailsService {
     account.setAcceptedPA(Boolean.FALSE);
 
     return this.accountRepository.save(account);
+  }
+
+  public void resetPassword(Account account) throws JsonProcessingException {
+    account.setPasswordResetToken(PasswordUtility.generateRandomAlphanumericString());
+    account.setPasswordResetTimestamp(LocalDateTime.now());
+
+    sqsUtility.sendMessage(MailRequestQueueDto.builder()
+        .requestType(MailRequestEnum.PASSWORD_RESET)
+        .recipient(account.getEmail())
+        .links(LinksDto.builder()
+            .resetPasswordLink(passwordResetLink
+                .replace("{passwordResetToken}", account.getPasswordResetToken())
+                .replace("{username}", account.getUsername()))
+            .build())
+        .build());
+
+    account.setPasswordResetToken(passwordEncoder.encode(account.getPasswordResetToken()));
+
+    this.accountRepository.save(account);
+    log.info("Password Reset email successfully sent for account with ID [{}]", account.getId());
   }
 }

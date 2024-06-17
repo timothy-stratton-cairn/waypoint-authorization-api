@@ -2,6 +2,8 @@ package com.cairnfg.waypoint.authorization.configuration.security;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import com.cairnfg.waypoint.authorization.endpoints.account.CompletePasswordResetEndpoint;
+import com.cairnfg.waypoint.authorization.endpoints.account.ResetPasswordEndpoint;
 import com.cairnfg.waypoint.authorization.endpoints.oauth2.OAuth2LoginEndpoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -47,6 +49,8 @@ public class SecurityConfiguration {
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests((authorize) -> authorize
             .requestMatchers(OAuth2LoginEndpoint.PATH).permitAll()
+            .requestMatchers(ResetPasswordEndpoint.PATH).permitAll()
+            .requestMatchers(CompletePasswordResetEndpoint.PATH).permitAll()
             .requestMatchers("/.well-known/openid-configuration").permitAll()
             .requestMatchers("/swagger-ui/**").permitAll()
             .requestMatchers("/v3/api-docs/**").permitAll()

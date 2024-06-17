@@ -80,6 +80,11 @@ public class Account extends BaseEntity implements IBaseEntity<Long>, UserDetail
   @Temporal(TemporalType.TIMESTAMP)
   private LocalDateTime passwordExpirationDate;
 
+  private String passwordResetToken;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  private LocalDateTime passwordResetTimestamp;
+
   @Column(name = "accepted_tc")
   private Boolean acceptedTC; //terms and conditions
   @Column(name = "accepted_eula")
