@@ -29,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -94,10 +93,17 @@ public class CompletePasswordResetEndpoint {
       return generateFailureResponse(
           getPasswordComplexityViolations(resetPasswordRequestDto.getNewPassword()),
           HttpStatus.BAD_REQUEST);
+    } else if (LocalDateTime.now().minusMinutes(30L)
+        .isAfter(accountOptional.get().getPasswordResetTimestamp())) {
+      return generateFailureResponse(
+          "Password Reset Token has Expired. Please try again.",
+          HttpStatus.BAD_REQUEST);
     } else {
       Account accountToUpdate = accountOptional.get();
 
       accountToUpdate.setPassword(passwordEncoder.encode(resetPasswordRequestDto.getNewPassword()));
+      accountToUpdate.setPasswordResetToken(null);
+      accountToUpdate.setPasswordResetTimestamp(null);
 
       accountToUpdate = this.accountService.saveAccount(accountToUpdate);
 
@@ -142,7 +148,6 @@ public class CompletePasswordResetEndpoint {
 
   private ResponseEntity<ErrorMessage> generateFailureResponse(String message, HttpStatus status) {
     log.warn(message);
-    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
     return new ResponseEntity<>(
         ErrorMessage.builder()
             .path(PATH)
