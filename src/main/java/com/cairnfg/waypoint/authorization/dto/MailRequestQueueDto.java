@@ -15,4 +15,5 @@ public class MailRequestQueueDto {
   @Builder.Default
   private List<String> attachments = new ArrayList<>();
   private LinksDto links;
+  private TemplateParametersDto parameters;
 }

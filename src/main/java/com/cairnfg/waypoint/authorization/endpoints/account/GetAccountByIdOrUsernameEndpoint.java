@@ -26,21 +26,21 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @Tag(name = "Account")
-public class GetAccountByIdEndpoint {
+public class GetAccountByIdOrUsernameEndpoint {
 
-  public static final String PATH = "/api/account/{accountId}";
+  public static final String PATH = "/api/account/{accountIdOrUsername}";
 
   private final AccountService accountService;
 
-  public GetAccountByIdEndpoint(AccountService accountService) {
+  public GetAccountByIdOrUsernameEndpoint(AccountService accountService) {
     this.accountService = accountService;
   }
 
   @GetMapping(PATH)
   @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")
   @Operation(
-      summary = "Retrieves am account by it's ID.",
-      description = "Retrieves an account by it's ID. Requires the `account.read` permission.",
+      summary = "Retrieves an account by it's ID or Username.",
+      description = "Retrieves an account by it's ID or Username. Requires the `account.read` permission.",
       security = @SecurityRequirement(name = "oAuth2JwtBearer"),
       responses = {
           @ApiResponse(responseCode = "200",
@@ -54,18 +54,37 @@ public class GetAccountByIdEndpoint {
           @ApiResponse(responseCode = "404", description = "Not Found",
               content = {@Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorMessage.class))})})
-  public ResponseEntity<?> getAccountById(@PathVariable Long accountId,
+  public ResponseEntity<?> getAccountByIdOrUsername(@PathVariable String accountIdOrUsername,
       Principal principal) {
-    log.info("User [{}] is Retrieving Account with ID [{}]", principal.getName(),
-        accountId);
+    log.info("User [{}] is Retrieving Account with ID/Username [{}]", principal.getName(),
+        accountIdOrUsername);
+    Long accountId = null;
+    String accountUsername = null;
+    try {
+      accountId = Long.parseLong(accountIdOrUsername);
+    } catch (NumberFormatException e) {
+      accountUsername = accountIdOrUsername;
+    }
 
     final ResponseEntity<?>[] response = new ResponseEntity<?>[1];
-    this.accountService.getAccountById(accountId)
-        .ifPresentOrElse(
-            returnedAccount -> response[0] = generateSuccessResponse(
-                returnedAccount),
-            () -> response[0] = generateFailureResponse(accountId)
-        );
+
+    if (accountId != null) {
+      Long finalAccountId = accountId;
+      this.accountService.getAccountById(accountId)
+          .ifPresentOrElse(
+              returnedAccount -> response[0] = generateSuccessResponse(
+                  returnedAccount),
+              () -> response[0] = generateFailureResponse(finalAccountId.toString())
+          );
+    } else {
+      String finalAccountUsername = accountUsername;
+      this.accountService.findByUsername(accountUsername)
+          .ifPresentOrElse(
+              returnedAccount -> response[0] = generateSuccessResponse(
+                  returnedAccount),
+              () -> response[0] = generateFailureResponse(finalAccountUsername)
+          );
+    }
 
     return response[0];
   }
@@ -93,14 +112,14 @@ public class GetAccountByIdEndpoint {
     );
   }
 
-  public ResponseEntity<ErrorMessage> generateFailureResponse(Long protocolTemplateId) {
-    log.info("User Account with ID [{}] not found", protocolTemplateId);
+  public ResponseEntity<ErrorMessage> generateFailureResponse(String accountIdOrUsername) {
+    log.info("User Account with ID/Username [{}] not found", accountIdOrUsername);
     return new ResponseEntity<>(
         ErrorMessage.builder()
             .path(PATH)
             .timestamp(LocalDateTime.now())
             .status(HttpStatus.NOT_FOUND.value())
-            .error("User Account with ID [" + protocolTemplateId + "] not found")
+            .error("User Account with ID/Username [" + accountIdOrUsername + "] not found")
             .build(),
         HttpStatus.NOT_FOUND
     );
