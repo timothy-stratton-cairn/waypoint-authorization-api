@@ -3,6 +3,7 @@ waypoint:
     base-url: http://localhost:8082
     dashboard-api:
       base-url: http://localhost:8083
+      download-database-backup-url-path: /api/file/db-backup/{s3Key}
     encrypted-field:
       secret-key: ldcAQwZs6EWmWJC#GVsx%*1s3RJfoabp%mfa@%9&BiDwQRjT$0qEvqLrj3jU2F0j$DHN5xVOGlQ*NUILqHZQparn8zWCVaM9GPB
       salt: zS95&#$yYWDLBUMM
@@ -12,6 +13,9 @@ waypoint:
       private-key: MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDVAzaCquLopxr6Xd0uZxzCEcvn/QzEw2qfoBPTbAzmDhadW0wu2/pUX2OX07qw+nZZxWqjgCD0PIUr5wWa4vWkFbYtmV8BTX8RqSESWAXLap2FYA4MJ48Gnc7Klr3zBMjMjBJc870Ih7a/pelX5wgCIYK+bLzePPbm/LZmZYTf6ODw9Ad5QAd71/qQmtOUj/J9Jd9Iz5XEvvXgeZpqt/nz4owCV0CdPyIxPL5tJldXjwMwh4qe0tr6QOr9DOMwzsS/HlpTdKZG5s0Pt0hGfEOZpwQp9Y7kXorv5XSbUq7nY+AFzMW9LYHTp3t92RmtWZBjMuUyZDvOuTyFP683HJKPAgMBAAECggEAXHhSl5LbgifYvEs3E0fL4iubmw/tFRXIGZeCQ8uqJcyD4LebcNQp7aqjL2vIpb901S+wRV3/8Ea9gPt/IWfZPuv19AGajpQ3z1DefHodudqEmzvBnWEm47Zp6ORbfT3cdX9xEUz2CNfxa2z4ySIQBezKNyQ5MTjB7jBSdk0ny5MfWsHUKmzJgcnfYiuu1k28NWqi+CZbv4DwGXSGxViKpdayzxaIgPIb5adrq/KsmXBsARVfXXscZPbr7Ik3cd1ENZ25wREW+1NZVH3O71Nv1iL7XmDYxD8s7qNaX7h00rVUTjJ6yXbQFh9nuuRcwLJ4C8589jgPHott9LkTSTy28QKBgQD/ATquLbN+/ybJ1pIDZaAUMGElfX82bJQVNdMwP+ubPoTgpDTRaRtaaPF9ymb+FMdNFVR3xdf3TXFC2qSyJSa21s1vBOvyjMOBI5ZxpYRBwMbvKI1Ju2tSRPivEHcZgxBSdb28y1grTseoQtWc4x4dnjuIouXNgTYExsgBFJEbTQKBgQDV2Aet4FXXqptVAdlLHhGyd9ORw0/C8C15ANj7mRGoDwe/lGZbVxn2+KgaOAsOEg3wSxgAvEV3yRJhNxMfU8esaZ8VZLdQAT0wB32djT3E5ZwGF5hUFlMBi85wP1ZHWUHV10OFlr0eZcftVzs1ML9IrFMCwG9kSpL/BIlaSVhfSwKBgGIljvhLDrLqcXtt4nT8QEiE9l7/ll7UG4quVMJVV9FAltP/X3TaB3UcvxWzOUDBrpO0ifYvZ5f/boBUtt75/ZSRyC/arRWFqBmkINtM4UKNeAPEj9y5De10LmLy62QeVcHnH0fy29SPVbklQCJKJ+UuaauFRv15pdjgyUnhKJhhAoGAfpHdCbdMV9gtFEWB3Yowo1d1LENUBGewInyz8UcKQlSTG3u0kb+eKKXIqaweLvfUtDNeQ6Er5NhoPo4gjVxDRPNHK5xvO7VgB/uHCCe/NblJffmdObf07WdYiuuSH6ze4LkGyB0OVt2bVglZjAQMU/FbOLe5trzFAJgoy/25hr0CgYBXQu3YDtcmpQdFOA91IpAkP8DlZwF3MwCmqnhiYCBwDX/gmWc5M603Wrc664K11cw6i7MES4gemFDeRdVDmq2aqRKSGm/GamWF7XYgL90YY7xlmuJSQZWCjOGUsxEFGkY2T2o524Bv7bsjmMNLbjRl8OLm6njyVHgMxrMaj/f7lQ==
     reset-password:
       link: http://localhost:8080/password-reset?passwordResetToken={passwordResetToken}&username={username}
+    s3:
+      bucket: waypoints-authorization-api
+      database-dump-prefix: database-dump/
 
 spring:
   application:

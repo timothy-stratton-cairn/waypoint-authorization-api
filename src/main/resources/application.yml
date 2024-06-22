@@ -10,6 +10,11 @@ waypoint:
     oauth2:
       public-key: ${OAUTH2_PUBLIC_KEY}
       private-key: ${OAUTH2_PRIVATE_KEY}
+    reset-password:
+      link: ${RESET_PASSWORD_LINK}
+    s3:
+      bucket: ${S3_BUCKET}
+      database-dump-prefix: ${S3_DB_DUMP_PATH}
 
 
 spring:

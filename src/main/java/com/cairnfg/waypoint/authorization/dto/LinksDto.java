@@ -8,4 +8,5 @@ import lombok.Data;
 public class LinksDto {
 
   private String resetPasswordLink;
+  private String downloadDbBackupLink;
 }
