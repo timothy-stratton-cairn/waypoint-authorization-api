@@ -28,8 +28,6 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -120,84 +118,22 @@ public class AddAccountEndpoint {
       }
 
       Account createdAccount = createAccount(accountDetailsDto, principal.getName(), roles);
-      Household household;
-      Optional<Account> coClientAccountOptional;
 
-      if (accountDetailsDto.getCoClientId() != null) {
-        if ((coClientAccountOptional = this.accountService.getAccountById(
-            accountDetailsDto.getCoClientId())).isEmpty()) {
-          TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-          return generateFailureResponse("Account with ID [" + accountDetailsDto.getCoClientId()
-                  + "] specified for the Co-Client not found",
-              HttpStatus.NOT_FOUND);
-        } else {
-          createdAccount.setCoClient(coClientAccountOptional.get());
-
-          coClientAccountOptional.get().setCoClient(createdAccount);
-        }
-      }
-
-      if (createdAccount.getCoClient() != null &&
-          createdAccount.getCoClient().getHousehold() != null) {
-        household = createdAccount.getCoClient().getHousehold();
-        createdAccount.setHousehold(createdAccount.getCoClient().getHousehold());
-
-        createdAccount.setIsPrimaryContactForHousehold(Boolean.TRUE);
-      } else {
-        household = Household.builder()
+      if (accountDetailsDto.getCreateHousehold()) {
+        Household household = Household.builder()
             .modifiedBy(principal.getName())
-            .name(createdAccount.getCoClient() != null ?
-                createdAccount.getLastName().equals(createdAccount.getCoClient().getLastName()) ?
-                    createdAccount.getLastName() + " Household" :
-                    createdAccount.getLastName() + "/" + createdAccount.getCoClient().getLastName()
-                        + " Household" :
-                createdAccount.getLastName() + " Household")
-            .description(createdAccount.getCoClient() != null ?
-                createdAccount.getLastName().equals(createdAccount.getCoClient().getLastName()) ?
-                    createdAccount.getLastName() + " Household" :
-                    createdAccount.getLastName() + "/" + createdAccount.getCoClient().getLastName()
-                        + " Household" :
-                createdAccount.getLastName() + " Household")
-            .householdAccounts(createdAccount.getCoClient() != null ?
-                new HashSet<>(Arrays.asList(createdAccount, createdAccount.getCoClient())) :
-                new HashSet<>(Arrays.asList(createdAccount)))
+            .name(accountDetailsDto.getHouseholdName())
+            .description(accountDetailsDto.getHouseholdName())
+            .householdAccounts(new HashSet<>(Arrays.asList(createdAccount)))
             .build();
 
         household = this.householdService.saveHousehold(household);
 
         createdAccount.setHousehold(household);
         createdAccount.setIsPrimaryContactForHousehold(Boolean.TRUE);
-        if (createdAccount.getCoClient() != null) {
-          createdAccount.getCoClient().setHousehold(household);
-          createdAccount.getCoClient().setIsPrimaryContactForHousehold(Boolean.TRUE);
-        }
       }
 
-      if (accountDetailsDto.getDependentIds() != null) {
-        List<Account> dependentAccounts = this.accountService.getAccountListsByIdList(
-            accountDetailsDto.getDependentIds().stream().toList());
-
-        if (!dependentAccounts.stream()
-            .map(Account::getId)
-            .collect(Collectors.toSet())
-            .containsAll(accountDetailsDto.getDependentIds())) {
-          TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-          return generateFailureResponse(
-              "Provided Account IDs for Dependents [" + accountDetailsDto.getDependentIds().stream()
-                  .map(Object::toString)
-                  .collect(Collectors.joining(","))
-                  + "]  not found",
-              HttpStatus.NOT_FOUND);
-        }
-
-        Household finalHousehold = household;
-        dependentAccounts.forEach(dependentAccount -> dependentAccount.setHousehold(
-            finalHousehold));
-
-        createdAccount.setDependents(new HashSet<>(dependentAccounts));
-      }
-
-      accountService.saveAccount(createdAccount);
+      createdAccount = accountService.saveAccount(createdAccount);
 
       log.info("Account [{}] created successfully with ID [{}]", accountDetailsDto.getUsername(),
           createdAccount.getId());
@@ -218,7 +154,8 @@ public class AddAccountEndpoint {
                   .dependents(createdAccount.getDependents().stream()
                       .map(AccountMapper.INSTANCE::accountToLinkedAccountDetailsDto)
                       .collect(Collectors.toSet()))
-                  .householdId(household.getId())
+                  .householdId(createdAccount.getHousehold() == null ? null
+                      : createdAccount.getHousehold().getId())
                   .build());
     }
   }

@@ -37,6 +37,9 @@ public class AddAccountDetailsDto {
 
   private String password;
 
+  private Boolean createHousehold;
+  private String householdName;
+
   private Long coClientId;
   private Set<Long> dependentIds;
 }
