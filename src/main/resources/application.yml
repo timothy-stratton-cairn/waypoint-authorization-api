@@ -3,6 +3,7 @@ waypoint:
     base-url: ${APP_BASE_URL}
     dashboard-api:
       base-url: ${DASHBOARD_API_BASE_URL}
+      download-database-backup-url-path: ${DB_BACKUP_URL_PATH}
     encrypted-field:
       secret-key: ${ENCRYPTED_FIELD_SECRET_KEY}
       salt: ${ENCRYPTED_FIELD_SALT}
