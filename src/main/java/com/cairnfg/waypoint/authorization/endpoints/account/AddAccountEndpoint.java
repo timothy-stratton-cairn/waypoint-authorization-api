@@ -119,7 +119,8 @@ public class AddAccountEndpoint {
 
       Account createdAccount = createAccount(accountDetailsDto, principal.getName(), roles);
 
-      if (accountDetailsDto.getCreateHousehold()) {
+      if (accountDetailsDto.getCreateHousehold() != null &&
+          accountDetailsDto.getCreateHousehold()) {
         Household household = Household.builder()
             .modifiedBy(principal.getName())
             .name(accountDetailsDto.getHouseholdName())
