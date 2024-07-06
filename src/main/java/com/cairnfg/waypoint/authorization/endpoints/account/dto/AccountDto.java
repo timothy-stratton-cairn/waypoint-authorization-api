@@ -11,5 +11,6 @@ public class AccountDto {
   private String firstName;
   private String lastName;
   private String email;
+  private Long householdId;
   private AccountRolesListDto accountRoles;
 }
