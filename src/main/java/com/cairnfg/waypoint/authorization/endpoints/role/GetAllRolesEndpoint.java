@@ -10,10 +10,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -43,8 +46,33 @@ public class GetAllRolesEndpoint {
               content = {@Content(schema = @Schema(hidden = true))}),
           @ApiResponse(responseCode = "403", description = "Forbidden",
               content = {@Content(schema = @Schema(hidden = true))})})
-  public ResponseEntity<RoleListDto> getAllRoles(Principal principal) {
-    log.info("User [{}] is retrieving all Roles", principal.getName());
+  public ResponseEntity<?> getAllRoles(Principal principal,
+      @RequestParam(value = "roleId") Optional<Long[]> optionalRoleIds) {
+    final ResponseEntity<?>[] response = new ResponseEntity<?>[1];
+    optionalRoleIds.ifPresentOrElse(
+        accountIds -> response[0] = buildFilteredAccountList(accountIds, principal.getName()),
+        () -> response[0] = buildUnfilteredAccountList(principal.getName())
+    );
+
+    return response[0];
+  }
+
+  private ResponseEntity<RoleListDto> buildFilteredAccountList(Long[] roleIds,
+      String modifiedBy) {
+    log.info("User [{}] is Retrieving Roles with ID List [{}]", modifiedBy,
+        roleIds);
+    return ResponseEntity.ok(
+        RoleListDto.builder()
+            .roles(
+                this.roleService.getAllRoles(List.of(roleIds)).stream()
+                    .map(RoleMapper.INSTANCE::toDto)
+                    .toList())
+            .build()
+    );
+  }
+
+  private ResponseEntity<RoleListDto> buildUnfilteredAccountList(String modifiedBy) {
+    log.info("User [{}] is retrieving all Roles", modifiedBy);
     return ResponseEntity.ok(
         RoleListDto.builder()
             .roles(

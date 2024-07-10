@@ -21,6 +21,10 @@ public class RoleService {
     return this.roleRepository.findAll();
   }
 
+  public List<Role> getAllRoles(List<Long> roleIds) {
+    return this.roleRepository.findAllById(roleIds);
+  }
+
   public Set<Role> getAccountRoleMappingDetails(Set<Long> roleIdList) {
     return roleIdList.stream()
         .map(roleId -> this.roleRepository.findById(roleId)
