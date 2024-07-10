@@ -16,8 +16,13 @@ waypoint:
     s3:
       bucket: ${S3_BUCKET}
       database-dump-prefix: ${S3_DB_DUMP_PATH}
-
-
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        #Endpoints need to be configured in WebSecurityConfiguration class
+        include: health
 spring:
   application:
     name: waypoint-authorization-api

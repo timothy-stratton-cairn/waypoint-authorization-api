@@ -42,7 +42,7 @@ public class WaypointAuthorizationApiApp {
 
   public static void main(String[] args) {
     SpringApplication app = new SpringApplication(WaypointAuthorizationApiApp.class);
-    app.setAdditionalProfiles("dev");
+    app.setAdditionalProfiles("default");
     app.run(args);
     log.info("App is running...");
   }

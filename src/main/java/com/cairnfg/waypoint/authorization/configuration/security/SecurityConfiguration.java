@@ -54,6 +54,7 @@ public class SecurityConfiguration {
             .requestMatchers("/.well-known/openid-configuration").permitAll()
             .requestMatchers("/swagger-ui/**").permitAll()
             .requestMatchers("/v3/api-docs/**").permitAll()
+            .requestMatchers("/health").permitAll()
             .anyRequest().authenticated()
         )
         .addFilter(bearerTokenAuthenticationFilter);
