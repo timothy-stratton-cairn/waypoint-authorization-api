@@ -55,6 +55,11 @@ public class PasswordUtility {
     return RandomStringUtils.random(DEF_COUNT, 0, 0, true, true, null, SECURE_RANDOM);
   }
 
+
+  public static String generateRandomAlphanumericString(int length) {
+    return RandomStringUtils.random(length, 0, 0, true, true, null, SECURE_RANDOM);
+  }
+
   public static boolean isPasswordValid(String potentialPassword)
       throws PasswordValidationException, JsonProcessingException {
     PasswordResponseDto validationResponse = validatePassword(potentialPassword);

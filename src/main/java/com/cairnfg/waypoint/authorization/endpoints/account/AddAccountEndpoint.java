@@ -103,13 +103,25 @@ public class AddAccountEndpoint {
     } else if (this.accountService.findByUsername(accountDetailsDto.getUsername()).isPresent()) {
       return generateFailureResponse("User with username [" +
           accountDetailsDto.getUsername() + "] already exists", HttpStatus.CONFLICT);
-    } else if (PasswordUtility.validatePassword(accountDetailsDto.getPassword()).getOverallStatus()
-        .equals(
-            Status.FAILED)) {
-      return generateFailureResponse(
-          getPasswordComplexityViolations(accountDetailsDto.getPassword()),
-          HttpStatus.BAD_REQUEST);
     } else {
+      if (accountDetailsDto.getPassword() != null) {
+        if (PasswordUtility.validatePassword(accountDetailsDto.getPassword()).getOverallStatus()
+            .equals(
+                Status.FAILED)) {
+          return generateFailureResponse(
+              getPasswordComplexityViolations(accountDetailsDto.getPassword()),
+              HttpStatus.BAD_REQUEST);
+        }
+      } else {
+        accountDetailsDto.setPassword(PasswordUtility.generateRandomAlphanumericString());
+      }
+      if (accountDetailsDto.getUsername() == null) {
+        accountDetailsDto.setUsername(
+            accountDetailsDto.getFirstName().toLowerCase() + "." +
+            accountDetailsDto.getLastName().toLowerCase() + "-" +
+            PasswordUtility.generateRandomAlphanumericString(6).toLowerCase());
+      }
+
       Set<Role> roles;
       try {
         roles = this.roleService.getAccountRoleMappingDetails(accountDetailsDto.getRoleIds());

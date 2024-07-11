@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AddAccountDetailsDto {
 
-  @NotBlank(message = "Username is required")
   @Size(min = 1, max = 255, message = "Username length should be between 1 and 255")
   private String username;
 
@@ -31,7 +30,6 @@ public class AddAccountDetailsDto {
   @NotEmpty(message = "Inherited Roles list cannot be empty")
   private Set<Long> roleIds;
 
-  @NotBlank(message = "Enter valid email address")
   @Email(message = "Enter valid email address", regexp = ".*[a-zA-Z]+.*@.+")
   private String email;
 
