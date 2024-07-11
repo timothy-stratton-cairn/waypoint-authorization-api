@@ -118,8 +118,8 @@ public class AddAccountEndpoint {
       if (accountDetailsDto.getUsername() == null) {
         accountDetailsDto.setUsername(
             accountDetailsDto.getFirstName().toLowerCase() + "." +
-            accountDetailsDto.getLastName().toLowerCase() + "-" +
-            PasswordUtility.generateRandomAlphanumericString(6).toLowerCase());
+                accountDetailsDto.getLastName().toLowerCase() + "-" +
+                PasswordUtility.generateRandomAlphanumericString(6).toLowerCase());
       }
 
       Set<Role> roles;

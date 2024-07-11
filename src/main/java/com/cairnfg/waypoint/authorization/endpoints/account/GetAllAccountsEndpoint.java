@@ -73,7 +73,8 @@ public class GetAllAccountsEndpoint {
                         .firstName(account.getFirstName())
                         .lastName(account.getLastName())
                         .email(account.getEmail())
-                        .householdId(account.getHousehold() == null ? null : account.getHousehold().getId())
+                        .householdId(
+                            account.getHousehold() == null ? null : account.getHousehold().getId())
                         .accountRoles(AccountRolesListDto.builder()
                             .roles(account.getRoles().stream()
                                 .map(Role::getName)
@@ -96,7 +97,8 @@ public class GetAllAccountsEndpoint {
                         .firstName(account.getFirstName())
                         .lastName(account.getLastName())
                         .email(account.getEmail())
-                        .householdId(account.getHousehold() == null ? null : account.getHousehold().getId())
+                        .householdId(
+                            account.getHousehold() == null ? null : account.getHousehold().getId())
                         .accountRoles(AccountRolesListDto.builder()
                             .roles(account.getRoles().stream()
                                 .map(Role::getName)
