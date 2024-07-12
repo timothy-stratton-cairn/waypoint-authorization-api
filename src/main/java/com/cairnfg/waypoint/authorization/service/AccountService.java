@@ -9,6 +9,7 @@ import com.cairnfg.waypoint.authorization.utility.PasswordUtility;
 import com.cairnfg.waypoint.authorization.utility.sqs.SqsUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,6 +67,10 @@ public class AccountService implements UserDetailsService {
 
   public Account saveAccount(Account account) {
     return this.accountRepository.save(account);
+  }
+
+  public Collection<Account> saveAllAccounts(Collection<Account> accounts) {
+    return this.accountRepository.saveAll(accounts);
   }
 
   public Account createAccount(Account account) {

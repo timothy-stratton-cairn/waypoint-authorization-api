@@ -130,6 +130,24 @@ public class UpdateHouseholdDetailsEndpoint {
         householdToUpdate.setDescription(householdDetailsDto.getDescription());
       }
 
+      if (householdDetailsDto.getHouseholdAccountIds() != null &&
+          !householdDetailsDto.getHouseholdAccountIds().isEmpty()) {
+        householdToUpdate.getHouseholdAccounts().forEach(account -> {
+          account.setModifiedBy(principal.getName());
+          account.setHousehold(null);
+          account.setIsPrimaryContactForHousehold(null);
+        });
+
+        accountService.saveAllAccounts(householdToUpdate.getHouseholdAccounts());
+
+        householdAccounts.forEach(account -> {
+          account.setModifiedBy(principal.getName());
+          account.setHousehold(householdToUpdate);
+          accountService.saveAccount(account);
+        });
+        householdToUpdate.setHouseholdAccounts(new HashSet<>(householdAccounts));
+      }
+
       if (householdDetailsDto.getPrimaryContactAccountIds() != null) {
         List<Account> accountsNoLongerPrimaryContactOfHousehold = householdToUpdate.getPrimaryContacts()
             .stream()
@@ -149,11 +167,6 @@ public class UpdateHouseholdDetailsEndpoint {
             })
             .collect(Collectors.toList());
         newPrimaryAccounts.forEach(accountService::saveAccount);
-      }
-
-      if (householdDetailsDto.getHouseholdAccountIds() != null &&
-          !householdDetailsDto.getHouseholdAccountIds().isEmpty()) {
-        householdToUpdate.setHouseholdAccounts(new HashSet<>(householdAccounts));
       }
 
       Household updatedHousehold = householdService.saveHousehold(householdToUpdate);
