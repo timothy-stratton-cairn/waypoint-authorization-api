@@ -79,8 +79,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
+      <groupId>org.springframework.boot</groupId>
     </dependency>
 
     <dependency>
@@ -89,8 +89,8 @@
       <version>${aws-java-sdk-s3.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-sqs</artifactId>
+      <groupId>com.amazonaws</groupId>
       <version>1.12.744</version>
     </dependency>
     <dependency>
@@ -170,7 +170,10 @@
 
   <properties>
     <HikariCP.version>5.1.0</HikariCP.version>
+    <aws-java-sdk-s3.version>1.12.704</aws-java-sdk-s3.version>
     <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
+    <commons-exec.version>1.4.0</commons-exec.version>
+    <commons-io.version>2.16.1</commons-io.version>
     <javafaker.version>1.0.2</javafaker.version>
     <liquibase-core.version>4.25.1</liquibase-core.version>
     <lombok.version>1.18.30</lombok.version>
@@ -180,9 +183,6 @@
     <mysql-connector-j.version>8.2.0</mysql-connector-j.version>
     <org.mapstruct.version>1.6.0.Beta1</org.mapstruct.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <aws-java-sdk-s3.version>1.12.704</aws-java-sdk-s3.version>
-    <commons-exec.version>1.4.0</commons-exec.version>
-    <commons-io.version>2.16.1</commons-io.version>
   </properties>
 
   <version>0.0.1</version>

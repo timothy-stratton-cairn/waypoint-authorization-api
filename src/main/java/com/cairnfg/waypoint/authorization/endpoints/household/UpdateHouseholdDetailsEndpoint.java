@@ -141,14 +141,14 @@ public class UpdateHouseholdDetailsEndpoint {
             .collect(Collectors.toList());
         accountsNoLongerPrimaryContactOfHousehold.forEach(accountService::saveAccount);
 
-        List<Account> newPrimaryAccount = primaryAccounts.stream()
+        List<Account> newPrimaryAccounts = primaryAccounts.stream()
             .map(account -> {
               account.setModifiedBy(principal.getName());
               account.setIsPrimaryContactForHousehold(Boolean.TRUE);
               return account;
             })
             .collect(Collectors.toList());
-        newPrimaryAccount.forEach(accountService::saveAccount);
+        newPrimaryAccounts.forEach(accountService::saveAccount);
       }
 
       if (householdDetailsDto.getHouseholdAccountIds() != null &&
