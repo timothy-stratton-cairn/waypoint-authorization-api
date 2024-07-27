@@ -114,7 +114,6 @@ public class UpdateAccountDetailsEndpoint {
 
       Optional<Account> coClientAccountOptional;
       Account accountToUpdate = accountToUpdateOptional.get();
-      Household household = accountToUpdate.getHousehold();
       accountToUpdate.setModifiedBy(principal.getName());
 
       if (accountDetailsDto.getRoleIds() != null) {
@@ -139,42 +138,6 @@ public class UpdateAccountDetailsEndpoint {
         }
       }
 
-      if (household == null && accountToUpdate.getCoClient() != null &&
-          accountToUpdate.getCoClient().getHousehold() != null) {
-        household = accountToUpdate.getCoClient().getHousehold();
-        accountToUpdate.setHousehold(accountToUpdate.getCoClient().getHousehold());
-
-        accountToUpdate.setIsPrimaryContactForHousehold(Boolean.TRUE);
-      } else if (household == null) {
-        household = Household.builder()
-            .modifiedBy(principal.getName())
-            .name(accountToUpdate.getCoClient() != null ?
-                accountToUpdate.getLastName().equals(accountToUpdate.getCoClient().getLastName()) ?
-                    accountToUpdate.getLastName() + " Household" :
-                    accountToUpdate.getLastName() + "/" + accountToUpdate.getCoClient()
-                        .getLastName() + " Household" :
-                accountToUpdate.getLastName() + " Household")
-            .description(accountToUpdate.getCoClient() != null ?
-                accountToUpdate.getLastName().equals(accountToUpdate.getCoClient().getLastName()) ?
-                    accountToUpdate.getLastName() + " Household" :
-                    accountToUpdate.getLastName() + "/" + accountToUpdate.getCoClient()
-                        .getLastName() + " Household" :
-                accountToUpdate.getLastName() + " Household")
-            .householdAccounts(accountToUpdate.getCoClient() != null ?
-                new HashSet<>(Arrays.asList(accountToUpdate, accountToUpdate.getCoClient())) :
-                new HashSet<>(Arrays.asList(accountToUpdate)))
-            .build();
-
-        household = this.householdService.saveHousehold(household);
-      }
-
-      accountToUpdate.setHousehold(household);
-      accountToUpdate.setIsPrimaryContactForHousehold(
-          accountDetailsDto.getIsPrimaryHouseholdContact());
-      if (accountToUpdate.getCoClient() != null) {
-        accountToUpdate.getCoClient().setHousehold(household);
-      }
-
       if (accountDetailsDto.getDependentIds() != null) {
         List<Account> dependentAccounts = this.accountService.getAccountListsByIdList(
             accountDetailsDto.getDependentIds().stream().toList());
@@ -190,23 +153,6 @@ public class UpdateAccountDetailsEndpoint {
                   + "]  not found",
               HttpStatus.NOT_FOUND);
         }
-
-        if (household == null) {
-          Set<Account> householdAccounts = new HashSet<>(dependentAccounts);
-          householdAccounts.add(accountToUpdate);
-
-          household = Household.builder()
-              .name(accountToUpdate.getLastName() + " Household")
-              .description(accountToUpdate.getLastName() + " Household")
-              .householdAccounts(householdAccounts)
-              .build();
-
-          household = this.householdService.saveHousehold(household);
-        }
-
-        Household finalHousehold = household;
-        dependentAccounts.forEach(dependentAccount -> dependentAccount.setHousehold(
-            finalHousehold));
 
         accountToUpdate.setDependents(new HashSet<>(dependentAccounts));
       }
