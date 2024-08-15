@@ -3,6 +3,11 @@ package com.cairnfg.waypoint.authorization.endpoints.account;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountListDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountRolesListDto;
+import com.cairnfg.waypoint.authorization.endpoints.account.dto.AssociatedAccountDto;
+import com.cairnfg.waypoint.authorization.endpoints.account.dto.AssociatedAccountListDto;
+import com.cairnfg.waypoint.authorization.endpoints.household.dto.enumeration.HouseholdRoleEnum;
+import com.cairnfg.waypoint.authorization.entity.Account;
+import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +18,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -80,6 +87,20 @@ public class GetAllAccountsEndpoint {
                                 .map(Role::getName)
                                 .toList())
                             .build())
+                        .associatedAccounts(AssociatedAccountListDto.builder()
+                            .accounts(Stream.concat(Stream.of(account.getCoClient()), account.getDependents().stream())
+                                .map(Account.class::cast)
+                                .filter(Objects::nonNull)
+                                .map(associatedAccount -> AssociatedAccountDto.builder()
+                                    .id(associatedAccount.getId())
+                                    .username(associatedAccount.getUsername())
+                                    .firstName(associatedAccount.getFirstName())
+                                    .lastName(associatedAccount.getLastName())
+                                    .role(
+                                        getHouseholdRole(account.getHousehold(), associatedAccount))
+                                    .build())
+                                .toList())
+                            .build())
                         .build())
                     .toList())
             .build()
@@ -104,9 +125,37 @@ public class GetAllAccountsEndpoint {
                                 .map(Role::getName)
                                 .toList())
                             .build())
+                        .associatedAccounts(AssociatedAccountListDto.builder()
+                            .accounts(Stream.concat(Stream.of(account.getCoClient()), account.getDependents().stream())
+                                .map(Account.class::cast)
+                                .filter(Objects::nonNull)
+                                .map(associatedAccount -> AssociatedAccountDto.builder()
+                                    .id(associatedAccount.getId())
+                                    .username(associatedAccount.getUsername())
+                                    .firstName(associatedAccount.getFirstName())
+                                    .lastName(associatedAccount.getLastName())
+                                    .role(
+                                        getHouseholdRole(account.getHousehold(), associatedAccount))
+                                    .build())
+                                .toList())
+                            .build())
                         .build())
                     .toList())
             .build()
     );
+  }
+
+  private HouseholdRoleEnum getHouseholdRole(Household household, Account account) {
+    try {
+      if (household.getPrimaryContacts().contains(account)) {
+        return HouseholdRoleEnum.PRIMARY_CONTACT;
+      } else if (account.getCoClient() != null) {
+        return HouseholdRoleEnum.CO_CLIENT;
+      } else {
+        return HouseholdRoleEnum.DEPENDENT;
+      }
+    } catch (Exception e) {
+      return null;
+    }
   }
 }

@@ -40,20 +40,19 @@ public class ResetPasswordEndpoint {
           @ApiResponse(responseCode = "200",
               content = {@Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
                   schema = @Schema(implementation = String.class))})})
-  public ResponseEntity<String> resetPassword(@RequestParam String username,
-      @RequestParam String email)
+  public ResponseEntity<String> resetPassword(@RequestParam Optional<String> username,
+      @RequestParam Optional<String> email)
       throws JsonProcessingException {
-    log.info("Attempting to reset password for account [{}}", username);
+    log.info("Attempting to reset password for account with username/email [{}/{}}", username,
+        email);
 
     try {
-      Optional<Account> userAccountOptional;
+      Optional<Account> userAccountOptional = username.isPresent() ?
+          accountService.findByUsername(username.get()) :
+          accountService.findByEmail(email
+              .orElseThrow(EntityNotFoundException::new));
 
-      if ((userAccountOptional = accountService.findByUsername(username)).isEmpty()) {
-        userAccountOptional = accountService.findByEmail(email);
-        userAccountOptional.orElseThrow(EntityNotFoundException::new);
-      }
-
-      accountService.resetPassword(userAccountOptional.get());
+      accountService.resetPassword(userAccountOptional.orElseThrow(EntityNotFoundException::new));
 
       log.info("Password Reset for account [{}] successful",
           userAccountOptional.get().getUsername());

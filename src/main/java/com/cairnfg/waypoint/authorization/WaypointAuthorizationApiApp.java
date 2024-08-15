@@ -3,16 +3,8 @@ package com.cairnfg.waypoint.authorization;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.AccountRelationship;
 import com.cairnfg.waypoint.authorization.entity.RegisteredClient;
-import com.cairnfg.waypoint.authorization.repository.AccountRelationshipRepository;
-import com.cairnfg.waypoint.authorization.repository.AccountRepository;
-import com.cairnfg.waypoint.authorization.repository.PermissionRepository;
-import com.cairnfg.waypoint.authorization.repository.RegisteredClientRepository;
-import com.cairnfg.waypoint.authorization.repository.RoleRepository;
+import com.cairnfg.waypoint.authorization.repository.*;
 import jakarta.annotation.PostConstruct;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -23,6 +15,11 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @SpringBootApplication
