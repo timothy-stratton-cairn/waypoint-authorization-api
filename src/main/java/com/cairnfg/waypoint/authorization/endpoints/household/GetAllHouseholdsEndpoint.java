@@ -24,6 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.cairnfg.waypoint.utils.EndpointsUtility;
 
 @Slf4j
 @RestController
@@ -80,7 +81,7 @@ public class GetAllHouseholdsEndpoint {
                                     .id(account.getId())
                                     .firstName(account.getFirstName())
                                     .lastName(account.getLastName())
-                                    .role(getHouseholdRole(household, account))
+                                    .role(EndpointsUtility.getHouseholdRole(household, account))
                                     .build())
                                 .collect(Collectors.toList()))
                             .build())
@@ -105,7 +106,7 @@ public class GetAllHouseholdsEndpoint {
                                     .id(account.getId())
                                     .firstName(account.getFirstName())
                                     .lastName(account.getLastName())
-                                    .role(getHouseholdRole(household, account))
+                                    .role(EndpointsUtility.getHouseholdRole(household, account))
                                     .build())
                                 .collect(Collectors.toList()))
                             .build())
@@ -115,7 +116,7 @@ public class GetAllHouseholdsEndpoint {
     );
   }
 
-  private HouseholdRoleEnum getHouseholdRole(Household household, Account account) {
+  /*public HouseholdRoleEnum getHouseholdRole(Household household, Account account) {
     try {
       if (household.getPrimaryContacts().contains(account)) {
         return HouseholdRoleEnum.PRIMARY_CONTACT;
@@ -127,5 +128,5 @@ public class GetAllHouseholdsEndpoint {
     } catch (Exception e) {
       return null;
     }
-  }
+  }*/
 }
