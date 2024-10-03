@@ -10,6 +10,8 @@ import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
+import com.cairnfg.waypoint.authorization.service.helper.HouseholdHelperService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,7 +29,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.cairnfg.waypoint.utils.EndpointsUtility;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @Slf4j
@@ -98,7 +99,7 @@ public class GetAllAccountsEndpoint {
                                     .firstName(associatedAccount.getFirstName())
                                     .lastName(associatedAccount.getLastName())
                                     .role(
-                                        EndpointsUtility.getHouseholdRole(account.getHousehold(), associatedAccount))
+                                    	HouseholdHelperService.getHouseholdRole(account.getHousehold(), associatedAccount))
                                     .build())
                                 .toList())
                             .build())
@@ -136,7 +137,7 @@ public class GetAllAccountsEndpoint {
                                     .firstName(associatedAccount.getFirstName())
                                     .lastName(associatedAccount.getLastName())
                                     .role(
-                                        EndpointsUtility.getHouseholdRole(account.getHousehold(), associatedAccount))
+                                    	HouseholdHelperService.getHouseholdRole(account.getHousehold(), associatedAccount))
                                     .build())
                                 .toList())
                             .build())

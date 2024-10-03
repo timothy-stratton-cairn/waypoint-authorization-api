@@ -8,6 +8,8 @@ import com.cairnfg.waypoint.authorization.endpoints.household.dto.enumeration.Ho
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.service.HouseholdService;
+import com.cairnfg.waypoint.authorization.service.helper.HouseholdHelperService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,7 +26,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.cairnfg.waypoint.utils.EndpointsUtility;
 
 @Slf4j
 @RestController
@@ -81,7 +82,7 @@ public class GetAllHouseholdsEndpoint {
                                     .id(account.getId())
                                     .firstName(account.getFirstName())
                                     .lastName(account.getLastName())
-                                    .role(EndpointsUtility.getHouseholdRole(household, account))
+                                    .role(HouseholdHelperService.getHouseholdRole(household, account))
                                     .build())
                                 .collect(Collectors.toList()))
                             .build())
@@ -106,7 +107,7 @@ public class GetAllHouseholdsEndpoint {
                                     .id(account.getId())
                                     .firstName(account.getFirstName())
                                     .lastName(account.getLastName())
-                                    .role(EndpointsUtility.getHouseholdRole(household, account))
+                                    .role(HouseholdHelperService.getHouseholdRole(household, account))
                                     .build())
                                 .collect(Collectors.toList()))
                             .build())
