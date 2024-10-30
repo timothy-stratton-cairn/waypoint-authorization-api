@@ -146,18 +146,4 @@ public class GetAllAccountsEndpoint {
             .build()
     );
   }
-/*
-  private HouseholdRoleEnum getHouseholdRole(Household household, Account account) {
-    try {
-      if (household.getPrimaryContacts().contains(account)) {
-        return HouseholdRoleEnum.PRIMARY_CONTACT;
-      } else if (account.getCoClient() != null) {
-        return HouseholdRoleEnum.CO_CLIENT;
-      } else {
-        return HouseholdRoleEnum.DEPENDENT;
-      }
-    } catch (Exception e) {
-      return null;
-    }
-  }*/
 }
