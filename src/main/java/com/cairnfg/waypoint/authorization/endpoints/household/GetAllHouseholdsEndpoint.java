@@ -8,6 +8,8 @@ import com.cairnfg.waypoint.authorization.endpoints.household.dto.enumeration.Ho
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.service.HouseholdService;
+import com.cairnfg.waypoint.authorization.service.helper.HouseholdHelperService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -80,7 +82,7 @@ public class GetAllHouseholdsEndpoint {
                                     .id(account.getId())
                                     .firstName(account.getFirstName())
                                     .lastName(account.getLastName())
-                                    .role(getHouseholdRole(household, account))
+                                    .role(HouseholdHelperService.getHouseholdRole(household, account))
                                     .build())
                                 .collect(Collectors.toList()))
                             .build())
@@ -105,7 +107,7 @@ public class GetAllHouseholdsEndpoint {
                                     .id(account.getId())
                                     .firstName(account.getFirstName())
                                     .lastName(account.getLastName())
-                                    .role(getHouseholdRole(household, account))
+                                    .role(HouseholdHelperService.getHouseholdRole(household, account))
                                     .build())
                                 .collect(Collectors.toList()))
                             .build())
@@ -115,7 +117,7 @@ public class GetAllHouseholdsEndpoint {
     );
   }
 
-  private HouseholdRoleEnum getHouseholdRole(Household household, Account account) {
+  /*public HouseholdRoleEnum getHouseholdRole(Household household, Account account) {
     try {
       if (household.getPrimaryContacts().contains(account)) {
         return HouseholdRoleEnum.PRIMARY_CONTACT;
@@ -127,5 +129,5 @@ public class GetAllHouseholdsEndpoint {
     } catch (Exception e) {
       return null;
     }
-  }
+  }*/
 }

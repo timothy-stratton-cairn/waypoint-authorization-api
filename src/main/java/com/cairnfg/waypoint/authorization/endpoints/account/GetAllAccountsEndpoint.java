@@ -10,6 +10,8 @@ import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
+import com.cairnfg.waypoint.authorization.service.helper.HouseholdHelperService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -97,7 +99,7 @@ public class GetAllAccountsEndpoint {
                                     .firstName(associatedAccount.getFirstName())
                                     .lastName(associatedAccount.getLastName())
                                     .role(
-                                        getHouseholdRole(account.getHousehold(), associatedAccount))
+                                    	HouseholdHelperService.getHouseholdRole(account.getHousehold(), associatedAccount))
                                     .build())
                                 .toList())
                             .build())
@@ -135,7 +137,7 @@ public class GetAllAccountsEndpoint {
                                     .firstName(associatedAccount.getFirstName())
                                     .lastName(associatedAccount.getLastName())
                                     .role(
-                                        getHouseholdRole(account.getHousehold(), associatedAccount))
+                                    	HouseholdHelperService.getHouseholdRole(account.getHousehold(), associatedAccount))
                                     .build())
                                 .toList())
                             .build())
@@ -143,19 +145,5 @@ public class GetAllAccountsEndpoint {
                     .toList())
             .build()
     );
-  }
-
-  private HouseholdRoleEnum getHouseholdRole(Household household, Account account) {
-    try {
-      if (household.getPrimaryContacts().contains(account)) {
-        return HouseholdRoleEnum.PRIMARY_CONTACT;
-      } else if (account.getCoClient() != null) {
-        return HouseholdRoleEnum.CO_CLIENT;
-      } else {
-        return HouseholdRoleEnum.DEPENDENT;
-      }
-    } catch (Exception e) {
-      return null;
-    }
   }
 }

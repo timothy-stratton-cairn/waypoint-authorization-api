@@ -36,7 +36,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @NoArgsConstructor
 @AllArgsConstructor
 @SQLRestriction("active=1")
-@Table(name = "account")
+@Table(name = "account")  //maps this to the account table in the database 
 public class Account extends BaseEntity implements IBaseEntity<Long>, UserDetails {
 
   private String username;
