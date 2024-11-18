@@ -115,49 +115,64 @@ public class GetAllAccountsEndpoint {
         AccountListDto.builder()
             .accounts(
                 this.accountService.getAllAccounts().stream()
-                    .map(account -> AccountDto.builder()
-                        .id(account.getId())
-                        .firstName(account.getFirstName())
-                        .lastName(account.getLastName())
-                        .email(account.getEmail())
-                        .householdId(
-                            account.getHousehold() == null ? null : account.getHousehold().getId())
-                        .accountRoles(AccountRolesListDto.builder()
-                            .roles(account.getRoles().stream()
-                                .map(Role::getName)
-                                .toList())
-                            .build())
-                        .associatedAccounts(AssociatedAccountListDto.builder()
-                            .accounts(Stream.concat(Stream.of(account.getCoClient()), account.getDependents().stream())
-                                .map(Account.class::cast)
-                                .filter(Objects::nonNull)
-                                .map(associatedAccount -> AssociatedAccountDto.builder()
-                                    .id(associatedAccount.getId())
-                                    .username(associatedAccount.getUsername())
-                                    .firstName(associatedAccount.getFirstName())
-                                    .lastName(associatedAccount.getLastName())
-                                    .role(
-                                    	HouseholdHelperService.getHouseholdRole(account.getHousehold(), associatedAccount))
-                                    .build())
-                                .toList())
-                            .build())
-                        .build())
+                    .map(account -> {
+                      Household household = account.getHousehold();
+                      HouseholdRoleEnum householdRole = HouseholdRoleEnum.NONE;
+
+                      // Check for null household before calling the helper service
+                      if (household != null) {
+                        householdRole = HouseholdHelperService.getHouseholdRole(household, account);
+                      } else {
+                        log.warn("Account [{}] has no household associated.", account.getId());
+                      }
+
+                      return AccountDto.builder()
+                          .id(account.getId())
+                          .firstName(account.getFirstName())
+                          .lastName(account.getLastName())
+                          .email(account.getEmail())
+                          .householdId(household == null ? null : household.getId())
+                          .accountRoles(AccountRolesListDto.builder()
+                              .roles(account.getRoles().stream()
+                                  .map(Role::getName)
+                                  .toList())
+                              .build())
+                          .associatedAccounts(AssociatedAccountListDto.builder()
+                              .accounts(Stream.concat(
+                                      Stream.of(account.getCoClient()),
+                                      account.getDependents().stream()
+                                  )
+                                  .filter(Objects::nonNull)
+                                  .map(associatedAccount -> {
+                                    Household associatedHousehold = associatedAccount.getHousehold();
+                                    HouseholdRoleEnum associatedRole = HouseholdRoleEnum.NONE;
+
+                                    // Check for null household in associated accounts
+                                    if (associatedHousehold != null) {
+                                      associatedRole = HouseholdHelperService.getHouseholdRole(
+                                          associatedHousehold, associatedAccount
+                                      );
+                                    } else {
+                                      log.warn(
+                                          "Associated Account [{}] has no household associated.",
+                                          associatedAccount.getId()
+                                      );
+                                    }
+
+                                    return AssociatedAccountDto.builder()
+                                        .id(associatedAccount.getId())
+                                        .username(associatedAccount.getUsername())
+                                        .firstName(associatedAccount.getFirstName())
+                                        .lastName(associatedAccount.getLastName())
+                                        .role(associatedRole)
+                                        .build();
+                                  })
+                                  .toList())
+                              .build())
+                          .build();
+                    })
                     .toList())
             .build()
     );
   }
-/*
-  private HouseholdRoleEnum getHouseholdRole(Household household, Account account) {
-    try {
-      if (household.getPrimaryContacts().contains(account)) {
-        return HouseholdRoleEnum.PRIMARY_CONTACT;
-      } else if (account.getCoClient() != null) {
-        return HouseholdRoleEnum.CO_CLIENT;
-      } else {
-        return HouseholdRoleEnum.DEPENDENT;
-      }
-    } catch (Exception e) {
-      return null;
-    }
-  }*/
 }

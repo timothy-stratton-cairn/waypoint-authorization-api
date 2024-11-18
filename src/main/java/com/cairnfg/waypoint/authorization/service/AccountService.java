@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +74,14 @@ public class AccountService implements UserDetailsService {
     return this.accountRepository.saveAll(accounts);
   }
 
+  public void deleteById(Long id) {
+    if (accountRepository.existsById(id)) {
+      accountRepository.deleteById(id);
+    } else {
+      throw new NoSuchElementException("Account with ID " + id + " does not exist.");
+    }
+  }
+
   public Account createAccount(Account account) {
     account.setPassword(passwordEncoder.encode(account.getPassword()));
     account.setCreated(LocalDateTime.now());
@@ -107,5 +116,9 @@ public class AccountService implements UserDetailsService {
 
     this.accountRepository.save(account);
     log.info("Password Reset email successfully sent for account with ID [{}]", account.getId());
+  }
+
+  public List<Account> getAccountsByHouseholdId(Long householdId) {
+    return accountRepository.findAllByHouseholdId(householdId);
   }
 }

@@ -71,6 +71,7 @@ public class UpdateHouseholdDetailsEndpoint {
           @ApiResponse(responseCode = "409", description = "Not Found",
               content = {@Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorMessage.class))})})
+
   public ResponseEntity<?> updateHouseholdById(@PathVariable Long householdId,
       @RequestBody UpdateHouseholdDetailsDto householdDetailsDto, Principal principal) {
     log.info("User [{}] is updating household detail with ID [{}]", principal.getName(),

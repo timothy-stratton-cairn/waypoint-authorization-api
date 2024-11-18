@@ -14,6 +14,10 @@ public class AccountDetailsDto {
   private String lastName;
   private Set<String> roles;
   private String email;
+  private String phone;
+  private String address;
+  private String city;
+  private String state;
   private LinkedAccountDetailsDto coClient;
   private Set<LinkedAccountDetailsDto> dependents;
   private Long householdId;
