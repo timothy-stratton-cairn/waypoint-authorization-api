@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -119,6 +121,22 @@ public class AccountService implements UserDetailsService {
   }
 
   public List<Account> getAccountsByHouseholdId(Long householdId) {
-    return accountRepository.findAllByHouseholdId(householdId);
+    return accountRepository.findAllByHouseholdId(householdId)};
+
+  @Transactional
+  public void removeCoClientFromHousehold(Long accountId) {
+    Optional<Account> accountOptional = accountRepository.findById(accountId);
+    if (accountOptional.isEmpty()) {
+      throw new IllegalArgumentException("Account with ID [" + accountId + "] not found");
+    }
+
+    Account account = accountOptional.get();
+
+    if (Boolean.TRUE.equals(account.getIsPrimaryContactForHousehold())) {
+      throw new IllegalStateException("Account with ID [" + accountId + "] is the primary contact and cannot be removed from household");
+    }
+    account.setHousehold(null);
+    accountRepository.save(account);
+    log.info("Account with ID [{}] removed from household successfully", accountId);
   }
 }
