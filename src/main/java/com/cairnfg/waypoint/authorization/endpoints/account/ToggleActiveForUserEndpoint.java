@@ -1,8 +1,8 @@
-package com.cairnfg.waypoint.authorization.endpoints.household;
+package com.cairnfg.waypoint.authorization.endpoints.account;
 
+import com.cairnfg.waypoint.authorization.entity.Account;
+import com.cairnfg.waypoint.authorization.service.AccountService;
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
-import com.cairnfg.waypoint.authorization.entity.Household;
-import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,15 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@Tag(name = "Household")
-public class ToggleActiveForHouseholdEndpoint {
+@Tag(name = "Account")
+public class ToggleActiveForUserEndpoint {
 
-  public static final String PATH = "/api/household/toggle-active/{householdId}";
-
-  private final HouseholdService householdService;
-
-  public ToggleActiveForHouseholdEndpoint(HouseholdService householdService) {
-    this.householdService = householdService;
+  private final AccountService accountService;
+  public static final String PATH = "/api/account/toggle-active/{accountId}";
+  public ToggleActiveForUserEndpoint(AccountService accountService) {
+    this.accountService = accountService;
   }
 
   @Transactional
@@ -55,30 +53,30 @@ public class ToggleActiveForHouseholdEndpoint {
               content = {@Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorMessage.class))})
       })
-  public ResponseEntity<?> toggleActiveForHousehold(@PathVariable Long householdId) {
-    try {
-      Optional<Household> householdOptional = householdService.getHouseholdById(householdId);
+  public ResponseEntity<?> toggleActiveAccount(@PathVariable Long accountId){
+    try{
+      Optional<Account> accountOptional = accountService.getAccountById(accountId);
 
-      if (householdOptional.isEmpty()) {
-        log.warn("Household with ID {} not found", householdId);
+      if (accountOptional.isEmpty()) {
+        log.warn("Account with ID {} not found", accountId);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(new ErrorMessage());
       }
+      Account account = accountOptional.get();
+      boolean newState = !Boolean.TRUE.equals(account.getActive());
+      account.setActive(newState);
+      accountService.saveAccount(account);
 
-      Household household = householdOptional.get();
-      boolean newState = !Boolean.TRUE.equals(household.getActive());
-      household.setActive(newState);
-      householdService.saveHousehold(household);
-
-      log.info("Household with ID {} toggled to active state: {}", householdId, newState);
-      return ResponseEntity.ok("Household active state toggled successfully to: " + newState);
-
+      log.info("Account with ID {} toggled to active state: {}", accountId, newState);
+      return ResponseEntity.ok("Account active state toggled successfully to: " + newState);
     }
-    catch (Exception e) {
-      log.error("Error toggling active state for household with ID {}: {}", householdId, e.getMessage(), e);
+    catch ( Exception e){
+      log.error("Error toggling active state for Account with ID {}: {}", accountId, e.getMessage(), e);
       TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(new ErrorMessage());
     }
-  }
+
+    }
+
 }

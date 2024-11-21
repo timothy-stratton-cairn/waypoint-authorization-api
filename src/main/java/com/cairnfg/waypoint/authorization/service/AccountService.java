@@ -121,7 +121,7 @@ public class AccountService implements UserDetailsService {
   }
 
   public List<Account> getAccountsByHouseholdId(Long householdId) {
-    return accountRepository.findAllByHouseholdId(householdId)};
+    return accountRepository.findAllByHouseholdId(householdId);};
 
   @Transactional
   public void removeCoClientFromHousehold(Long accountId) {
