@@ -1,7 +1,9 @@
 package com.cairnfg.waypoint.authorization.endpoints.household;
 
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
+import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.entity.Household;
+import com.cairnfg.waypoint.authorization.service.AccountService;
 import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,10 +30,12 @@ public class ToggleActiveForHouseholdEndpoint {
 
   public static final String PATH = "/api/household/toggle-active/{householdId}";
 
+  private final AccountService accountService;
   private final HouseholdService householdService;
 
-  public ToggleActiveForHouseholdEndpoint(HouseholdService householdService) {
+  public ToggleActiveForHouseholdEndpoint(HouseholdService householdService, AccountService accountService) {
     this.householdService = householdService;
+    this.accountService = accountService;
   }
 
   @Transactional
@@ -65,10 +70,23 @@ public class ToggleActiveForHouseholdEndpoint {
             .body(new ErrorMessage());
       }
 
+
+      List<Account> accounts = accountService.getAccountsByHouseholdId(householdId);
+
+      log.info("Accounts affected: {}", accounts.size());
+      for (Account account : accounts) {
+        log.info("Account: {} being set to Null", account.getId());
+        account.setHousehold(null);
+        accountService.saveAccount(account);
+        log.info("Account: {} set to Null", account.getId());
+      }
+
       Household household = householdOptional.get();
       boolean newState = !Boolean.TRUE.equals(household.getActive());
       household.setActive(newState);
       householdService.saveHousehold(household);
+
+
 
       log.info("Household with ID {} toggled to active state: {}", householdId, newState);
       return ResponseEntity.ok("Household active state toggled successfully to: " + newState);
