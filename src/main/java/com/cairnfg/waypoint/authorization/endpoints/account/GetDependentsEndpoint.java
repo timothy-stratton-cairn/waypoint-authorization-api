@@ -11,17 +11,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.security.Principal;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import java.security.Principal;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -84,11 +84,14 @@ public class GetDependentsEndpoint {
     return ResponseEntity.ok(AccountListDto.builder().accounts(dependentDtoList).build());
   }
 
-  private ResponseEntity<AccountListDto> buildFilteredAccountList(Long[] accountIds, String modifiedBy) {
-    log.info("User [{}] is retrieving dependent accounts with ID List [{}]", modifiedBy, accountIds);
+  private ResponseEntity<AccountListDto> buildFilteredAccountList(Long[] accountIds,
+      String modifiedBy) {
+    log.info("User [{}] is retrieving dependent accounts with ID List [{}]", modifiedBy,
+        accountIds);
 
     // Fetch AccountRelationships for the given account IDs
-    List<Account> dependentAccounts = accountRelationshipService.findByDependentIdIn(List.of(accountIds)).stream()
+    List<Account> dependentAccounts = accountRelationshipService.findByDependentIdIn(
+            List.of(accountIds)).stream()
         .map(AccountRelationship::getDependent)
         .filter(Objects::nonNull)
         .toList();

@@ -1,7 +1,7 @@
 package com.cairnfg.waypoint.authorization.endpoints.account;
 
-import com.cairnfg.waypoint.authorization.service.AccountService;
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
+import com.cairnfg.waypoint.authorization.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -37,8 +37,8 @@ public class DeleteAccountByIdEndpoint {
       responses = {
           @ApiResponse(responseCode = "204", description = "No Content - Account deleted successfully"),
           @ApiResponse(responseCode = "404", description = "Not Found - Account does not exist",
-              content = { @io.swagger.v3.oas.annotations.media.Content(
-                  schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorMessage.class)) }),
+              content = {@io.swagger.v3.oas.annotations.media.Content(
+                  schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorMessage.class))}),
           @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
       }
   )

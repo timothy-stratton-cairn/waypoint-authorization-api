@@ -11,9 +11,9 @@ databaseChangeLog:
             sql: ALTER TABLE account ADD COLUMN `is_primary_contact_for_household` bit(1) DEFAULT NULL AFTER `household_id`;
         - sql:
             dbms: 'h2, mysql'
-            sql: UPDATE account a 
-              JOIN household h ON a.household_id = h.id 
-              SET a.is_primary_contact_for_household = 1 
+            sql: UPDATE account a
+              JOIN household h ON a.household_id = h.id
+              SET a.is_primary_contact_for_household = 1
               WHERE a.id = h.primary_contact_account_id
   - changeSet:
       id: remove-unnecessary-column-from-household

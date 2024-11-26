@@ -54,10 +54,7 @@ public class GetAccountByIdOrUsernameEndpoint {
           @ApiResponse(responseCode = "404", description = "Not Found",
               content = {@Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorMessage.class))})})
-  
-  
-  
-  
+
   public ResponseEntity<?> getAccountByIdOrUsername(@PathVariable String accountIdOrUsername,
       Principal principal) {
     log.info("User [{}] is Retrieving Account with ID/Username [{}]", principal.getName(),

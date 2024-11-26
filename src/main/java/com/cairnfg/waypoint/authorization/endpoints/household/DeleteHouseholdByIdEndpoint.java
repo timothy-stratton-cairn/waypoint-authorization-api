@@ -1,10 +1,10 @@
 package com.cairnfg.waypoint.authorization.endpoints.household;
 
+import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.service.AccountRelationshipService;
 import com.cairnfg.waypoint.authorization.service.AccountService;
 import com.cairnfg.waypoint.authorization.service.HouseholdService;
-import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,7 +29,8 @@ public class DeleteHouseholdByIdEndpoint {
   private final AccountService accountService;
   private final AccountRelationshipService accountRelationshipService;
 
-  public DeleteHouseholdByIdEndpoint(HouseholdService householdService, AccountService accountService, AccountRelationshipService accountRelationshipService) {
+  public DeleteHouseholdByIdEndpoint(HouseholdService householdService,
+      AccountService accountService, AccountRelationshipService accountRelationshipService) {
     this.householdService = householdService;
     this.accountService = accountService;
     this.accountRelationshipService = accountRelationshipService;
@@ -45,8 +46,8 @@ public class DeleteHouseholdByIdEndpoint {
       responses = {
           @ApiResponse(responseCode = "204", description = "No Content - Household deleted successfully"),
           @ApiResponse(responseCode = "404", description = "Not Found - Household does not exist",
-              content = { @io.swagger.v3.oas.annotations.media.Content(
-                  schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorMessage.class)) }),
+              content = {@io.swagger.v3.oas.annotations.media.Content(
+                  schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorMessage.class))}),
           @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
       }
   )

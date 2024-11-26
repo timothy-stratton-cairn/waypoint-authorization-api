@@ -1,8 +1,9 @@
 package com.cairnfg.waypoint.authorization.endpoints.account;
 
+import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
 import com.cairnfg.waypoint.authorization.entity.Account;
 import com.cairnfg.waypoint.authorization.service.AccountService;
-import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
+import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Account")
 public class ToggleActiveForUserEndpoint {
 
-  private final AccountService accountService;
   public static final String PATH = "/api/account/toggle-active/{accountId}";
-  public ToggleActiveForUserEndpoint(AccountService accountService) {
+  private final AccountService accountService;
+
+  public ToggleActiveForUserEndpoint(AccountService accountService,
+      HouseholdService householdService) {
     this.accountService = accountService;
   }
 
@@ -53,14 +56,22 @@ public class ToggleActiveForUserEndpoint {
               content = {@Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorMessage.class))})
       })
-  public ResponseEntity<?> toggleActiveAccount(@PathVariable Long accountId){
-    try{
+  public ResponseEntity<?> toggleActiveAccount(@PathVariable Long accountId) {
+    try {
       Optional<Account> accountOptional = accountService.getAccountById(accountId);
 
       if (accountOptional.isEmpty()) {
         log.warn("Account with ID {} not found", accountId);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(new ErrorMessage());
+      } else {
+        int numOfAccountsLeftInHousehold = accountService.getAccountsByHouseholdId(
+            accountOptional.get().getHousehold().getId()).size();
+        if (numOfAccountsLeftInHousehold == 1) {
+          log.warn("Can not remove last User From Household");
+          return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ErrorMessage());
+
+        }
       }
       Account account = accountOptional.get();
       boolean newState = !Boolean.TRUE.equals(account.getActive());
@@ -69,14 +80,14 @@ public class ToggleActiveForUserEndpoint {
 
       log.info("Account with ID {} toggled to active state: {}", accountId, newState);
       return ResponseEntity.ok("Account active state toggled successfully to: " + newState);
-    }
-    catch ( Exception e){
-      log.error("Error toggling active state for Account with ID {}: {}", accountId, e.getMessage(), e);
+    } catch (Exception e) {
+      log.error("Error toggling active state for Account with ID {}: {}", accountId, e.getMessage(),
+          e);
       TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(new ErrorMessage());
     }
 
-    }
+  }
 
 }

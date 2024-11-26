@@ -12,17 +12,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -34,7 +33,8 @@ public class GetUnassignedAccountsEndpoint {
   private final AccountRelationshipService relationshipService;
   private final AccountService accountService;
 
-  public GetUnassignedAccountsEndpoint(AccountService accountService, AccountRelationshipService relationshipService) {
+  public GetUnassignedAccountsEndpoint(AccountService accountService,
+      AccountRelationshipService relationshipService) {
     this.accountService = accountService;
     this.relationshipService = relationshipService;
   }
@@ -66,7 +66,8 @@ public class GetUnassignedAccountsEndpoint {
         .collect(Collectors.toSet());
 
     List<AccountDto> unassignedAccounts = allAccounts.stream()
-        .filter(account -> account.getHousehold() == null && !dependentIds.contains(account.getId()))
+        .filter(
+            account -> account.getHousehold() == null && !dependentIds.contains(account.getId()))
         .map(account -> AccountDto.builder()
             .id(account.getId())
             .firstName(account.getFirstName())

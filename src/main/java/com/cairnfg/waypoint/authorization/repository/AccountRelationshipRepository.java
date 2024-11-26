@@ -7,13 +7,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AccountRelationshipRepository extends JpaRepository<AccountRelationship, Long> {
 
-    List<AccountRelationship> findByDependentIdIn(List<Long> dependentIds);
+  List<AccountRelationship> findByDependentIdIn(List<Long> dependentIds);
 
-    Optional<AccountRelationship> findByMainAccountId(Long mainAccountId);
+  Optional<AccountRelationship> findByMainAccountId(Long mainAccountId);
 
-    List<AccountRelationship> findByCoClientId(Long coClientId);
+  List<AccountRelationship> findByCoClientId(Long coClientId);
 
-    List<AccountRelationship> findByDependentId(Long dependentId);
+  List<AccountRelationship> findByDependentId(Long dependentId);
 
-    List<AccountRelationship> findByActiveTrue();
+  List<AccountRelationship> findByActiveTrue();
 }

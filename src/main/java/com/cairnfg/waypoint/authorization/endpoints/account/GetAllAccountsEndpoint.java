@@ -11,7 +11,6 @@ import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.entity.Role;
 import com.cairnfg.waypoint.authorization.service.AccountService;
 import com.cairnfg.waypoint.authorization.service.helper.HouseholdHelperService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -90,7 +89,8 @@ public class GetAllAccountsEndpoint {
                                 .toList())
                             .build())
                         .associatedAccounts(AssociatedAccountListDto.builder()
-                            .accounts(Stream.concat(Stream.of(account.getCoClient()), account.getDependents().stream())
+                            .accounts(Stream.concat(Stream.of(account.getCoClient()),
+                                    account.getDependents().stream())
                                 .map(Account.class::cast)
                                 .filter(Objects::nonNull)
                                 .map(associatedAccount -> AssociatedAccountDto.builder()
@@ -99,7 +99,8 @@ public class GetAllAccountsEndpoint {
                                     .firstName(associatedAccount.getFirstName())
                                     .lastName(associatedAccount.getLastName())
                                     .role(
-                                    	HouseholdHelperService.getHouseholdRole(account.getHousehold(), associatedAccount))
+                                        HouseholdHelperService.getHouseholdRole(
+                                            account.getHousehold(), associatedAccount))
                                     .build())
                                 .toList())
                             .build())

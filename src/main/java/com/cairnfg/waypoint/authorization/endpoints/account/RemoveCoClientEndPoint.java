@@ -1,4 +1,5 @@
 package com.cairnfg.waypoint.authorization.endpoints.account;
+
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.UpdateAccountDetailsDto;
 import com.cairnfg.waypoint.authorization.entity.Account;
@@ -83,51 +84,51 @@ public class RemoveCoClientEndPoint {
           @ApiResponse(responseCode = "409", description = "Not Found",
               content = {@Content(mediaType = "application/json",
                   schema = @Schema(implementation = ErrorMessage.class))})})
-  
-  
-  
-  
-public ResponseEntity<?> updateHouseholdId(@PathVariable Long accountId,
-                                           @RequestBody UpdateAccountDetailsDto accountDetailsDto,
-                                           Principal principal) {
 
-    log.info("User [{}] is attempting to update householdId for account [{}]", principal.getName(), accountId);
+  public ResponseEntity<?> updateHouseholdId(@PathVariable Long accountId,
+      @RequestBody UpdateAccountDetailsDto accountDetailsDto,
+      Principal principal) {
+
+    log.info("User [{}] is attempting to update householdId for account [{}]", principal.getName(),
+        accountId);
 
     // Retrieve the account
     Optional<Account> accountToUpdateOptional = this.accountService.getAccountById(accountId);
     if (accountToUpdateOptional.isEmpty()) {
-        return generateFailureResponse("Account with ID [" + accountId + "] not found", HttpStatus.NOT_FOUND);
+      return generateFailureResponse("Account with ID [" + accountId + "] not found",
+          HttpStatus.NOT_FOUND);
     }
 
     Account accountToUpdate = accountToUpdateOptional.get();
 
     // Check if isPrimaryContact is false, and if so, set householdId to null
     if (Boolean.FALSE.equals(accountToUpdate.getIsPrimaryContactForHousehold())) {
-        accountToUpdate.setHousehold(null);
-        log.info("householdId set to null", accountId);
+      accountToUpdate.setHousehold(null);
+      log.info("householdId set to null", accountId);
+    } else {
+      return generateFailureResponse("Account [" + accountId + "] is the primary contact",
+          HttpStatus.NOT_FOUND);
     }
-    else
-    	return generateFailureResponse("Account [" + accountId + "] is the primary contact", HttpStatus.NOT_FOUND);
-
 
     Account updatedAccount = this.accountService.saveAccount(accountToUpdate);
 
-    log.info("Account [{}] updated successfully with ID [{}]", updatedAccount.getUsername(), updatedAccount.getId());
+    log.info("Account [{}] updated successfully with ID [{}]", updatedAccount.getUsername(),
+        updatedAccount.getId());
     return ResponseEntity.status(HttpStatus.OK)
-            .body("Account with ID [" + updatedAccount.getId() + "] updated successfully");
-}
+        .body("Account with ID [" + updatedAccount.getId() + "] updated successfully");
+  }
 
   private ResponseEntity<ErrorMessage> generateFailureResponse(String message, HttpStatus status) {
-	    log.warn(message);
-	    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-	    return new ResponseEntity<>(
-	        ErrorMessage.builder()
-	            .path(PATH)
-	            .timestamp(LocalDateTime.now())
-	            .status(status.value())
-	            .error(message)
-	            .build(),
-	        status
-	    );
+    log.warn(message);
+    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+    return new ResponseEntity<>(
+        ErrorMessage.builder()
+            .path(PATH)
+            .timestamp(LocalDateTime.now())
+            .status(status.value())
+            .error(message)
+            .build(),
+        status
+    );
   }
 }

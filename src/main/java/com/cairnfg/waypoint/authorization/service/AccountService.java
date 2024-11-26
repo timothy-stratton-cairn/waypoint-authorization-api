@@ -8,14 +8,13 @@ import com.cairnfg.waypoint.authorization.repository.AccountRepository;
 import com.cairnfg.waypoint.authorization.utility.PasswordUtility;
 import com.cairnfg.waypoint.authorization.utility.sqs.SqsUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -121,7 +120,10 @@ public class AccountService implements UserDetailsService {
   }
 
   public List<Account> getAccountsByHouseholdId(Long householdId) {
-    return accountRepository.findAllByHouseholdId(householdId);};
+    return accountRepository.findAllByHouseholdId(householdId);
+  }
+
+  ;
 
   @Transactional
   public void removeCoClientFromHousehold(Long accountId) {
@@ -133,7 +135,8 @@ public class AccountService implements UserDetailsService {
     Account account = accountOptional.get();
 
     if (Boolean.TRUE.equals(account.getIsPrimaryContactForHousehold())) {
-      throw new IllegalStateException("Account with ID [" + accountId + "] is the primary contact and cannot be removed from household");
+      throw new IllegalStateException("Account with ID [" + accountId
+          + "] is the primary contact and cannot be removed from household");
     }
     account.setHousehold(null);
     accountRepository.save(account);

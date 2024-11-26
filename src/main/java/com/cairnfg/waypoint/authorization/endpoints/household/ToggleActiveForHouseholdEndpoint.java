@@ -33,7 +33,8 @@ public class ToggleActiveForHouseholdEndpoint {
   private final AccountService accountService;
   private final HouseholdService householdService;
 
-  public ToggleActiveForHouseholdEndpoint(HouseholdService householdService, AccountService accountService) {
+  public ToggleActiveForHouseholdEndpoint(HouseholdService householdService,
+      AccountService accountService) {
     this.householdService = householdService;
     this.accountService = accountService;
   }
@@ -70,10 +71,8 @@ public class ToggleActiveForHouseholdEndpoint {
             .body(new ErrorMessage());
       }
 
-
       List<Account> accounts = accountService.getAccountsByHouseholdId(householdId);
 
-      log.info("Accounts affected: {}", accounts.size());
       for (Account account : accounts) {
         log.info("Account: {} being set to Null", account.getId());
         account.setHousehold(null);
@@ -86,14 +85,12 @@ public class ToggleActiveForHouseholdEndpoint {
       household.setActive(newState);
       householdService.saveHousehold(household);
 
-
-
       log.info("Household with ID {} toggled to active state: {}", householdId, newState);
       return ResponseEntity.ok("Household active state toggled successfully to: " + newState);
 
-    }
-    catch (Exception e) {
-      log.error("Error toggling active state for household with ID {}: {}", householdId, e.getMessage(), e);
+    } catch (Exception e) {
+      log.error("Error toggling active state for household with ID {}: {}", householdId,
+          e.getMessage(), e);
       TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(new ErrorMessage());
