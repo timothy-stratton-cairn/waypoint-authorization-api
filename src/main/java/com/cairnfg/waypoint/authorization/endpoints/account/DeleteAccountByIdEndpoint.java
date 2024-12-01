@@ -21,14 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Account")
 public class DeleteAccountByIdEndpoint {
 
+  public static final String PATH ="/api/account/{accountId}";
+
   private final AccountService accountService;
 
   public DeleteAccountByIdEndpoint(AccountService accountService) {
     this.accountService = accountService;
   }
 
-  @Transactional
-  @DeleteMapping("/api/account/{accountId}")
+  @DeleteMapping(PATH)
   @PreAuthorize("hasAnyAuthority('SCOPE_account.full', 'SCOPE_admin.full')")
   @Operation(
       summary = "Deletes an account by its ID.",

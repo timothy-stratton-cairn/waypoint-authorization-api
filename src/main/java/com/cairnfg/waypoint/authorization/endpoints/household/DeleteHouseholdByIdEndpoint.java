@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Tag(name = "Household")
 public class DeleteHouseholdByIdEndpoint {
-
+  public static final String PATH ="/api/household/{householdId}";
   private final HouseholdService householdService;
   private final AccountService accountService;
   private final AccountRelationshipService accountRelationshipService;
@@ -37,7 +37,7 @@ public class DeleteHouseholdByIdEndpoint {
   }
 
   @Transactional
-  @DeleteMapping("/api/household/{householdId}")
+  @DeleteMapping(PATH)
   @PreAuthorize("hasAnyAuthority('SCOPE_household.full', 'SCOPE_admin.full')")
   @Operation(
       summary = "Deletes a household by its ID.",
@@ -51,7 +51,6 @@ public class DeleteHouseholdByIdEndpoint {
           @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
       }
   )
-
   public ResponseEntity<?> deleteHousehold(@PathVariable Long householdId) {
     try {
       log.info("Fetching accounts associated with household ID: {}", householdId);
