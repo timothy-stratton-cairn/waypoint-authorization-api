@@ -31,6 +31,14 @@ public class HouseholdService {
         .collect(Collectors.toList());
   }
 
+  public void deleteById(Long id) {
+    if (householdRepository.existsById(id)) {
+      householdRepository.deleteById(id);
+    } else {
+      throw new NoSuchElementException("Account with ID " + id + " does not exist.");
+    }
+  }
+
   public Household saveHousehold(Household household) {
     return getPrimaryContactsForHousehold(this.householdRepository.save(household));
   }

@@ -2,16 +2,9 @@ package com.cairnfg.waypoint.authorization.endpoints.account;
 
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountDto;
 import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountListDto;
-import com.cairnfg.waypoint.authorization.endpoints.account.dto.AccountRolesListDto;
-import com.cairnfg.waypoint.authorization.endpoints.account.dto.AssociatedAccountDto;
-import com.cairnfg.waypoint.authorization.endpoints.account.dto.AssociatedAccountListDto;
-import com.cairnfg.waypoint.authorization.endpoints.household.dto.enumeration.HouseholdRoleEnum;
 import com.cairnfg.waypoint.authorization.entity.Account;
-import com.cairnfg.waypoint.authorization.entity.Household;
-import com.cairnfg.waypoint.authorization.entity.Role;
-import com.cairnfg.waypoint.authorization.service.AccountService;
-import com.cairnfg.waypoint.authorization.service.helper.HouseholdHelperService;
-
+import com.cairnfg.waypoint.authorization.entity.AccountRelationship;
+import com.cairnfg.waypoint.authorization.service.AccountRelationshipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,7 +15,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,7 +23,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @Slf4j
 @RestController
 @Tag(name = "Account")
@@ -38,10 +30,10 @@ public class GetDependentsEndpoint {
 
   public static final String PATH = "/api/account/dependents";
 
-  private final AccountService accountService;
+  private final AccountRelationshipService accountRelationshipService;
 
-  public GetDependentsEndpoint(AccountService accountService) {
-    this.accountService = accountService;
+  public GetDependentsEndpoint(AccountRelationshipService accountRelationshipService) {
+    this.accountRelationshipService = accountRelationshipService;
   }
 
   @GetMapping(PATH)
@@ -57,7 +49,8 @@ public class GetDependentsEndpoint {
           @ApiResponse(responseCode = "401", description = "Unauthorized",
               content = {@Content(schema = @Schema(hidden = true))}),
           @ApiResponse(responseCode = "403", description = "Forbidden",
-              content = {@Content(schema = @Schema(hidden = true))})})
+              content = {@Content(schema = @Schema(hidden = true))})
+      })
   public ResponseEntity<?> getDependentAccounts(Principal principal,
       @RequestParam(value = "accountId") Optional<Long[]> optionalAccountIds) {
     final ResponseEntity<?>[] response = new ResponseEntity<?>[1];
@@ -69,13 +62,50 @@ public class GetDependentsEndpoint {
     return response[0];
   }
 
-private ResponseEntity<?> buildUnfilteredAccountList(String name) { //
-	// TODO Auto-generated method stub
-	return null;
-}
+  private ResponseEntity<AccountListDto> buildUnfilteredAccountList(String modifiedBy) {
+    log.info("User [{}] is retrieving all dependent accounts", modifiedBy);
 
-private ResponseEntity<?> buildFilteredAccountList(Long[] accountIds, String name) {
-	// TODO Auto-generated method stub
-	return null;
-}
+    // Fetch all AccountRelationships to identify dependents
+    List<Account> dependentAccounts = accountRelationshipService.findAll().stream()
+        .map(AccountRelationship::getDependent)
+        .filter(Objects::nonNull)
+        .toList();
+
+    // Map dependents to DTOs
+    List<AccountDto> dependentDtoList = dependentAccounts.stream()
+        .map(account -> AccountDto.builder()
+            .id(account.getId())
+            .firstName(account.getFirstName())
+            .lastName(account.getLastName())
+            .email(account.getEmail())
+            .build())
+        .collect(Collectors.toList());
+
+    return ResponseEntity.ok(AccountListDto.builder().accounts(dependentDtoList).build());
+  }
+
+  private ResponseEntity<AccountListDto> buildFilteredAccountList(Long[] accountIds,
+      String modifiedBy) {
+    log.info("User [{}] is retrieving dependent accounts with ID List [{}]", modifiedBy,
+        accountIds);
+
+    // Fetch AccountRelationships for the given account IDs
+    List<Account> dependentAccounts = accountRelationshipService.findByDependentIdIn(
+            List.of(accountIds)).stream()
+        .map(AccountRelationship::getDependent)
+        .filter(Objects::nonNull)
+        .toList();
+
+    // Map dependents to DTOs
+    List<AccountDto> dependentDtoList = dependentAccounts.stream()
+        .map(account -> AccountDto.builder()
+            .id(account.getId())
+            .firstName(account.getFirstName())
+            .lastName(account.getLastName())
+            .email(account.getEmail())
+            .build())
+        .collect(Collectors.toList());
+
+    return ResponseEntity.ok(AccountListDto.builder().accounts(dependentDtoList).build());
+  }
 }

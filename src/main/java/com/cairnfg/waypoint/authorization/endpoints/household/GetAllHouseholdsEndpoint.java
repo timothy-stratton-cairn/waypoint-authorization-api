@@ -4,12 +4,8 @@ import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdAccou
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdAccountListDto;
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdDto;
 import com.cairnfg.waypoint.authorization.endpoints.household.dto.HouseholdListDto;
-import com.cairnfg.waypoint.authorization.endpoints.household.dto.enumeration.HouseholdRoleEnum;
-import com.cairnfg.waypoint.authorization.entity.Account;
-import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import com.cairnfg.waypoint.authorization.service.helper.HouseholdHelperService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -82,7 +78,8 @@ public class GetAllHouseholdsEndpoint {
                                     .id(account.getId())
                                     .firstName(account.getFirstName())
                                     .lastName(account.getLastName())
-                                    .role(HouseholdHelperService.getHouseholdRole(household, account))
+                                    .role(
+                                        HouseholdHelperService.getHouseholdRole(household, account))
                                     .build())
                                 .collect(Collectors.toList()))
                             .build())
@@ -107,7 +104,8 @@ public class GetAllHouseholdsEndpoint {
                                     .id(account.getId())
                                     .firstName(account.getFirstName())
                                     .lastName(account.getLastName())
-                                    .role(HouseholdHelperService.getHouseholdRole(household, account))
+                                    .role(
+                                        HouseholdHelperService.getHouseholdRole(household, account))
                                     .build())
                                 .collect(Collectors.toList()))
                             .build())
@@ -116,18 +114,4 @@ public class GetAllHouseholdsEndpoint {
             .build()
     );
   }
-
-  /*public HouseholdRoleEnum getHouseholdRole(Household household, Account account) {
-    try {
-      if (household.getPrimaryContacts().contains(account)) {
-        return HouseholdRoleEnum.PRIMARY_CONTACT;
-      } else if (account.getCoClient() != null) {
-        return HouseholdRoleEnum.CO_CLIENT;
-      } else {
-        return HouseholdRoleEnum.DEPENDENT;
-      }
-    } catch (Exception e) {
-      return null;
-    }
-  }*/
 }
