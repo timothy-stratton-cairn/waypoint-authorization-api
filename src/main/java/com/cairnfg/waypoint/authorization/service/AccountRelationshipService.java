@@ -2,6 +2,7 @@ package com.cairnfg.waypoint.authorization.service;
 
 import com.cairnfg.waypoint.authorization.entity.AccountRelationship;
 import com.cairnfg.waypoint.authorization.repository.AccountRelationshipRepository;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,5 +48,20 @@ public class AccountRelationshipService {
 
   public List<AccountRelationship> findAll() {
     return repository.findAll();
+  }
+
+  public void removeDependentFromUser(Long mainAccountId, Long dependentId) {
+    if (mainAccountId == null || dependentId == null) {
+      throw new IllegalArgumentException("Main Account ID and Dependent ID must not be null.");
+    }
+
+    Optional<AccountRelationship> relationship = repository
+        .findByMainAccountIdAndDependentId(mainAccountId, dependentId);
+
+    if (relationship.isPresent()) {
+      repository.delete(relationship.get());
+    } else {
+      throw new EntityNotFoundException("AccountRelationship not found for the given criteria.");
+    }
   }
 }

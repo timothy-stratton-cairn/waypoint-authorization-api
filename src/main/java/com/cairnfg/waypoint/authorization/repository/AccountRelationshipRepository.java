@@ -16,4 +16,6 @@ public interface AccountRelationshipRepository extends JpaRepository<AccountRela
   List<AccountRelationship> findByDependentId(Long dependentId);
 
   List<AccountRelationship> findByActiveTrue();
+
+  Optional<AccountRelationship> findByMainAccountIdAndDependentId(Long mainAccountId, Long dependentId);
 }
