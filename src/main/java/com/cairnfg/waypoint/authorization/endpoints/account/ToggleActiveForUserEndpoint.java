@@ -2,6 +2,7 @@ package com.cairnfg.waypoint.authorization.endpoints.account;
 
 import com.cairnfg.waypoint.authorization.endpoints.ErrorMessage;
 import com.cairnfg.waypoint.authorization.entity.Account;
+import com.cairnfg.waypoint.authorization.entity.Household;
 import com.cairnfg.waypoint.authorization.service.AccountService;
 import com.cairnfg.waypoint.authorization.service.HouseholdService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,10 +29,12 @@ public class ToggleActiveForUserEndpoint {
 
   public static final String PATH = "/api/account/toggle-active/{accountId}";
   private final AccountService accountService;
+  private final HouseholdService householdService;
 
   public ToggleActiveForUserEndpoint(AccountService accountService,
       HouseholdService householdService) {
     this.accountService = accountService;
+    this.householdService = householdService;
   }
 
   @Transactional
@@ -64,15 +67,21 @@ public class ToggleActiveForUserEndpoint {
         log.warn("Account with ID {} not found", accountId);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(new ErrorMessage());
-      } else {
+      }
         int numOfAccountsLeftInHousehold = accountService.getAccountsByHouseholdId(
             accountOptional.get().getHousehold().getId()).size();
-        if (numOfAccountsLeftInHousehold == 1) {
-          log.warn("Can not remove last User From Household");
-          return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ErrorMessage());
+        if (numOfAccountsLeftInHousehold == 1 ) {
+          Optional<Household> householdOptional = householdService.getHouseholdById(
+              accountOptional.get().getHousehold().getId());
 
+          householdOptional.ifPresent(household -> {
+            household.setActive(false);
+            householdService.saveHousehold(household);
+            log.info("Household with ID {} set to inactive as the last user was deactivated",
+                household.getId());
+          });
         }
-      }
+
       Account account = accountOptional.get();
       boolean newState = !Boolean.TRUE.equals(account.getActive());
       account.setActive(newState);

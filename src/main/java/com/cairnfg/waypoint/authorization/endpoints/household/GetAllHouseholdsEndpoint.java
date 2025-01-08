@@ -13,7 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +67,16 @@ public class GetAllHouseholdsEndpoint {
       String modifiedBy) {
     log.info("User [{}] is Retrieving Households with ID List [{}]", modifiedBy,
         householdIds);
+
+    if (householdIds == null || householdIds.length == 0) {
+      log.warn("Household IDs are null or empty. Returning empty list.");
+      return ResponseEntity.ok(HouseholdListDto.builder().households(List.of()).build());
+    }
+
+    List<Long> householdIdList = Arrays.stream(householdIds)
+        .filter(Objects::nonNull)
+        .toList();
+
     return ResponseEntity.ok(
         HouseholdListDto.builder()
             .households(
